@@ -60,6 +60,60 @@ const routes = {
     tokens: [{"old":"/api/v1/workouts/:id","type":0,"val":"api","end":""},{"old":"/api/v1/workouts/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/workouts/:id","type":0,"val":"workouts","end":""},{"old":"/api/v1/workouts/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['workouts.update']['types'],
   },
+  'exercises.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/workouts/:workoutId/exercises',
+    tokens: [{"old":"/api/v1/workouts/:workoutId/exercises","type":0,"val":"api","end":""},{"old":"/api/v1/workouts/:workoutId/exercises","type":0,"val":"v1","end":""},{"old":"/api/v1/workouts/:workoutId/exercises","type":0,"val":"workouts","end":""},{"old":"/api/v1/workouts/:workoutId/exercises","type":1,"val":"workoutId","end":""},{"old":"/api/v1/workouts/:workoutId/exercises","type":0,"val":"exercises","end":""}],
+    types: placeholder as Registry['exercises.index']['types'],
+  },
+  'exercises.store': {
+    methods: ["POST"],
+    pattern: '/api/v1/workouts/:workoutId/exercises',
+    tokens: [{"old":"/api/v1/workouts/:workoutId/exercises","type":0,"val":"api","end":""},{"old":"/api/v1/workouts/:workoutId/exercises","type":0,"val":"v1","end":""},{"old":"/api/v1/workouts/:workoutId/exercises","type":0,"val":"workouts","end":""},{"old":"/api/v1/workouts/:workoutId/exercises","type":1,"val":"workoutId","end":""},{"old":"/api/v1/workouts/:workoutId/exercises","type":0,"val":"exercises","end":""}],
+    types: placeholder as Registry['exercises.store']['types'],
+  },
+  'exercises.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/workouts/:workoutId/exercises/:id',
+    tokens: [{"old":"/api/v1/workouts/:workoutId/exercises/:id","type":0,"val":"api","end":""},{"old":"/api/v1/workouts/:workoutId/exercises/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/workouts/:workoutId/exercises/:id","type":0,"val":"workouts","end":""},{"old":"/api/v1/workouts/:workoutId/exercises/:id","type":1,"val":"workoutId","end":""},{"old":"/api/v1/workouts/:workoutId/exercises/:id","type":0,"val":"exercises","end":""},{"old":"/api/v1/workouts/:workoutId/exercises/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['exercises.show']['types'],
+  },
+  'exercises.destroy': {
+    methods: ["DELETE"],
+    pattern: '/api/v1/workouts/:workoutId/exercises/:id',
+    tokens: [{"old":"/api/v1/workouts/:workoutId/exercises/:id","type":0,"val":"api","end":""},{"old":"/api/v1/workouts/:workoutId/exercises/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/workouts/:workoutId/exercises/:id","type":0,"val":"workouts","end":""},{"old":"/api/v1/workouts/:workoutId/exercises/:id","type":1,"val":"workoutId","end":""},{"old":"/api/v1/workouts/:workoutId/exercises/:id","type":0,"val":"exercises","end":""},{"old":"/api/v1/workouts/:workoutId/exercises/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['exercises.destroy']['types'],
+  },
+  'exercises.update': {
+    methods: ["PATCH"],
+    pattern: '/api/v1/workouts/:workoutId/exercises/:id',
+    tokens: [{"old":"/api/v1/workouts/:workoutId/exercises/:id","type":0,"val":"api","end":""},{"old":"/api/v1/workouts/:workoutId/exercises/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/workouts/:workoutId/exercises/:id","type":0,"val":"workouts","end":""},{"old":"/api/v1/workouts/:workoutId/exercises/:id","type":1,"val":"workoutId","end":""},{"old":"/api/v1/workouts/:workoutId/exercises/:id","type":0,"val":"exercises","end":""},{"old":"/api/v1/workouts/:workoutId/exercises/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['exercises.update']['types'],
+  },
+  'schedules.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/schedules',
+    tokens: [{"old":"/api/v1/schedules","type":0,"val":"api","end":""},{"old":"/api/v1/schedules","type":0,"val":"v1","end":""},{"old":"/api/v1/schedules","type":0,"val":"schedules","end":""}],
+    types: placeholder as Registry['schedules.index']['types'],
+  },
+  'schedules.store': {
+    methods: ["POST"],
+    pattern: '/api/v1/schedules',
+    tokens: [{"old":"/api/v1/schedules","type":0,"val":"api","end":""},{"old":"/api/v1/schedules","type":0,"val":"v1","end":""},{"old":"/api/v1/schedules","type":0,"val":"schedules","end":""}],
+    types: placeholder as Registry['schedules.store']['types'],
+  },
+  'schedules.update': {
+    methods: ["PATCH"],
+    pattern: '/api/v1/schedules/:id',
+    tokens: [{"old":"/api/v1/schedules/:id","type":0,"val":"api","end":""},{"old":"/api/v1/schedules/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/schedules/:id","type":0,"val":"schedules","end":""},{"old":"/api/v1/schedules/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['schedules.update']['types'],
+  },
+  'schedules.destroy': {
+    methods: ["DELETE"],
+    pattern: '/api/v1/schedules/:id',
+    tokens: [{"old":"/api/v1/schedules/:id","type":0,"val":"api","end":""},{"old":"/api/v1/schedules/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/schedules/:id","type":0,"val":"schedules","end":""},{"old":"/api/v1/schedules/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['schedules.destroy']['types'],
+  },
 } as const satisfies Record<string, AdonisEndpoint>
 
 export { routes }

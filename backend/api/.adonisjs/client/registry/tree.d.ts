@@ -25,4 +25,17 @@ export interface ApiDefinition {
     destroy: typeof routes['workouts.destroy']
     update: typeof routes['workouts.update']
   }
+  exercises: {
+    index: typeof routes['exercises.index']
+    store: typeof routes['exercises.store']
+    show: typeof routes['exercises.show']
+    destroy: typeof routes['exercises.destroy']
+    update: typeof routes['exercises.update']
+  }
+  schedules: {
+    index: typeof routes['schedules.index']
+    store: typeof routes['schedules.store']
+    update: typeof routes['schedules.update']
+    destroy: typeof routes['schedules.destroy']
+  }
 }

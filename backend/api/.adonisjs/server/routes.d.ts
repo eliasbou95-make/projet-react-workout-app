@@ -13,28 +13,49 @@ export type ScannedRoutes = {
     'workouts.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'workouts.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'workouts.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'exercises.index': { paramsTuple: [ParamValue]; params: {'workoutId': ParamValue} }
+    'exercises.store': { paramsTuple: [ParamValue]; params: {'workoutId': ParamValue} }
+    'exercises.show': { paramsTuple: [ParamValue,ParamValue]; params: {'workoutId': ParamValue,'id': ParamValue} }
+    'exercises.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'workoutId': ParamValue,'id': ParamValue} }
+    'exercises.update': { paramsTuple: [ParamValue,ParamValue]; params: {'workoutId': ParamValue,'id': ParamValue} }
+    'schedules.index': { paramsTuple?: []; params?: {} }
+    'schedules.store': { paramsTuple?: []; params?: {} }
+    'schedules.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'schedules.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   GET: {
     'profile.profile.show': { paramsTuple?: []; params?: {} }
     'workouts.index': { paramsTuple?: []; params?: {} }
     'workouts.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'exercises.index': { paramsTuple: [ParamValue]; params: {'workoutId': ParamValue} }
+    'exercises.show': { paramsTuple: [ParamValue,ParamValue]; params: {'workoutId': ParamValue,'id': ParamValue} }
+    'schedules.index': { paramsTuple?: []; params?: {} }
   }
   HEAD: {
     'profile.profile.show': { paramsTuple?: []; params?: {} }
     'workouts.index': { paramsTuple?: []; params?: {} }
     'workouts.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'exercises.index': { paramsTuple: [ParamValue]; params: {'workoutId': ParamValue} }
+    'exercises.show': { paramsTuple: [ParamValue,ParamValue]; params: {'workoutId': ParamValue,'id': ParamValue} }
+    'schedules.index': { paramsTuple?: []; params?: {} }
   }
   POST: {
     'auth.new_account.store': { paramsTuple?: []; params?: {} }
     'auth.access_tokens.store': { paramsTuple?: []; params?: {} }
     'profile.access_tokens.destroy': { paramsTuple?: []; params?: {} }
     'workouts.store': { paramsTuple?: []; params?: {} }
+    'exercises.store': { paramsTuple: [ParamValue]; params: {'workoutId': ParamValue} }
+    'schedules.store': { paramsTuple?: []; params?: {} }
   }
   DELETE: {
     'workouts.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'exercises.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'workoutId': ParamValue,'id': ParamValue} }
+    'schedules.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   PATCH: {
     'workouts.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'exercises.update': { paramsTuple: [ParamValue,ParamValue]; params: {'workoutId': ParamValue,'id': ParamValue} }
+    'schedules.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
 }
 declare module '@adonisjs/core/types/http' {
