@@ -191,24 +191,24 @@ export interface Registry {
     methods: ["POST"]
     pattern: '/api/v1/schedules'
     types: {
-      body: {}
+      body: ExtractBody<InferInput<(typeof import('#validators/schedule').createScheduleValidator)>>
       paramsTuple: []
       params: {}
-      query: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/schedule').createScheduleValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/schedules_controller').default['store']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/schedules_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/schedules_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
   'schedules.update': {
     methods: ["PATCH"]
     pattern: '/api/v1/schedules/:id'
     types: {
-      body: {}
+      body: ExtractBody<InferInput<(typeof import('#validators/schedule').updateScheduleValidator)>>
       paramsTuple: [ParamValue]
       params: { id: ParamValue }
-      query: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/schedule').updateScheduleValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/schedules_controller').default['update']>>>
-      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/schedules_controller').default['update']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/schedules_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
   'schedules.destroy': {
