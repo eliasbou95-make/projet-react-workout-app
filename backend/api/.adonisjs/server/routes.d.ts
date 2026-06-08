@@ -22,6 +22,12 @@ export type ScannedRoutes = {
     'schedules.store': { paramsTuple?: []; params?: {} }
     'schedules.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'schedules.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'workout_sessions.store': { paramsTuple: [ParamValue]; params: {'workoutId': ParamValue} }
+    'workout_sessions.index': { paramsTuple?: []; params?: {} }
+    'workout_sessions.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'workout_sessions.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'performances.store': { paramsTuple: [ParamValue]; params: {'sessionId': ParamValue} }
+    'performances.index': { paramsTuple: [ParamValue]; params: {'sessionId': ParamValue} }
   }
   GET: {
     'profile.profile.show': { paramsTuple?: []; params?: {} }
@@ -30,6 +36,9 @@ export type ScannedRoutes = {
     'exercises.index': { paramsTuple: [ParamValue]; params: {'workoutId': ParamValue} }
     'exercises.show': { paramsTuple: [ParamValue,ParamValue]; params: {'workoutId': ParamValue,'id': ParamValue} }
     'schedules.index': { paramsTuple?: []; params?: {} }
+    'workout_sessions.index': { paramsTuple?: []; params?: {} }
+    'workout_sessions.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'performances.index': { paramsTuple: [ParamValue]; params: {'sessionId': ParamValue} }
   }
   HEAD: {
     'profile.profile.show': { paramsTuple?: []; params?: {} }
@@ -38,6 +47,9 @@ export type ScannedRoutes = {
     'exercises.index': { paramsTuple: [ParamValue]; params: {'workoutId': ParamValue} }
     'exercises.show': { paramsTuple: [ParamValue,ParamValue]; params: {'workoutId': ParamValue,'id': ParamValue} }
     'schedules.index': { paramsTuple?: []; params?: {} }
+    'workout_sessions.index': { paramsTuple?: []; params?: {} }
+    'workout_sessions.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'performances.index': { paramsTuple: [ParamValue]; params: {'sessionId': ParamValue} }
   }
   POST: {
     'auth.new_account.store': { paramsTuple?: []; params?: {} }
@@ -46,6 +58,8 @@ export type ScannedRoutes = {
     'workouts.store': { paramsTuple?: []; params?: {} }
     'exercises.store': { paramsTuple: [ParamValue]; params: {'workoutId': ParamValue} }
     'schedules.store': { paramsTuple?: []; params?: {} }
+    'workout_sessions.store': { paramsTuple: [ParamValue]; params: {'workoutId': ParamValue} }
+    'performances.store': { paramsTuple: [ParamValue]; params: {'sessionId': ParamValue} }
   }
   DELETE: {
     'workouts.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -56,6 +70,7 @@ export type ScannedRoutes = {
     'workouts.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'exercises.update': { paramsTuple: [ParamValue,ParamValue]; params: {'workoutId': ParamValue,'id': ParamValue} }
     'schedules.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'workout_sessions.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
 }
 declare module '@adonisjs/core/types/http' {

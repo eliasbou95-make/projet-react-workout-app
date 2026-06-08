@@ -58,7 +58,6 @@ router
         router.patch('workouts/:workoutId/exercises/:id' , [controllers.Exercises, 'update'])
       })
       .use(middleware.auth())
-
 // groupe table shedules 
       router
         .group(() => {
@@ -69,10 +68,23 @@ router
         })
         .use(middleware.auth())
 
+  // groupe workout_sessions
+  router
+        .group(() => {
+          router.post('workouts/:workoutId/sessions', [controllers.WorkoutSessions, 'store'])
+          router.get('sessions', [controllers.WorkoutSessions, 'index'])
+          router.get('sessions/:id', [controllers.WorkoutSessions, 'show'])
+          router.patch('sessions/:id', [controllers.WorkoutSessions, 'update'])
+        })
+        .use(middleware.auth())
 
-
-
-
+  // groupe performances
+  router
+        .group(() => {
+          router.post('sessions/:sessionId/performances', [controllers.Performances, 'store'])
+          router.get('sessions/:sessionId/performances', [controllers.Performances, 'index'])
+        })
+        .use(middleware.auth())
 
   })
   .prefix('/api/v1')

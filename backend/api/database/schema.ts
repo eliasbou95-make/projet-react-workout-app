@@ -59,6 +59,29 @@ export class ExerciseSchema extends BaseModel {
   declare workoutId: number | null
 }
 
+export class PerformanceSchema extends BaseModel {
+  static $columns = ['createdAt', 'exerciseId', 'id', 'notes', 'reps', 'restTime', 'sessionId', 'updatedAt', 'weight'] as const
+  $columns = PerformanceSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column()
+  declare exerciseId: number | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare notes: string | null
+  @column()
+  declare reps: number | null
+  @column()
+  declare restTime: number | null
+  @column()
+  declare sessionId: number | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare weight: string | null
+}
+
 export class ScheduleSchema extends BaseModel {
   static $columns = ['createdAt', 'dayOfWeek', 'id', 'updatedAt', 'userId', 'workoutId'] as const
   $columns = ScheduleSchema.$columns
@@ -91,6 +114,25 @@ export class UserSchema extends BaseModel {
   declare password: string
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
+}
+
+export class WorkoutSessionSchema extends BaseModel {
+  static $columns = ['completedAt', 'createdAt', 'id', 'startedAt', 'updatedAt', 'userId', 'workoutId'] as const
+  $columns = WorkoutSessionSchema.$columns
+  @column.dateTime()
+  declare completedAt: DateTime | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column.dateTime()
+  declare startedAt: DateTime | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number | null
+  @column()
+  declare workoutId: number | null
 }
 
 export class WorkoutSchema extends BaseModel {

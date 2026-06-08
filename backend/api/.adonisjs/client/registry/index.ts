@@ -114,6 +114,42 @@ const routes = {
     tokens: [{"old":"/api/v1/schedules/:id","type":0,"val":"api","end":""},{"old":"/api/v1/schedules/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/schedules/:id","type":0,"val":"schedules","end":""},{"old":"/api/v1/schedules/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['schedules.destroy']['types'],
   },
+  'workout_sessions.store': {
+    methods: ["POST"],
+    pattern: '/api/v1/workouts/:workoutId/sessions',
+    tokens: [{"old":"/api/v1/workouts/:workoutId/sessions","type":0,"val":"api","end":""},{"old":"/api/v1/workouts/:workoutId/sessions","type":0,"val":"v1","end":""},{"old":"/api/v1/workouts/:workoutId/sessions","type":0,"val":"workouts","end":""},{"old":"/api/v1/workouts/:workoutId/sessions","type":1,"val":"workoutId","end":""},{"old":"/api/v1/workouts/:workoutId/sessions","type":0,"val":"sessions","end":""}],
+    types: placeholder as Registry['workout_sessions.store']['types'],
+  },
+  'workout_sessions.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/sessions',
+    tokens: [{"old":"/api/v1/sessions","type":0,"val":"api","end":""},{"old":"/api/v1/sessions","type":0,"val":"v1","end":""},{"old":"/api/v1/sessions","type":0,"val":"sessions","end":""}],
+    types: placeholder as Registry['workout_sessions.index']['types'],
+  },
+  'workout_sessions.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/sessions/:id',
+    tokens: [{"old":"/api/v1/sessions/:id","type":0,"val":"api","end":""},{"old":"/api/v1/sessions/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/sessions/:id","type":0,"val":"sessions","end":""},{"old":"/api/v1/sessions/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['workout_sessions.show']['types'],
+  },
+  'workout_sessions.update': {
+    methods: ["PATCH"],
+    pattern: '/api/v1/sessions/:id',
+    tokens: [{"old":"/api/v1/sessions/:id","type":0,"val":"api","end":""},{"old":"/api/v1/sessions/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/sessions/:id","type":0,"val":"sessions","end":""},{"old":"/api/v1/sessions/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['workout_sessions.update']['types'],
+  },
+  'performances.store': {
+    methods: ["POST"],
+    pattern: '/api/v1/sessions/:sessionId/performances',
+    tokens: [{"old":"/api/v1/sessions/:sessionId/performances","type":0,"val":"api","end":""},{"old":"/api/v1/sessions/:sessionId/performances","type":0,"val":"v1","end":""},{"old":"/api/v1/sessions/:sessionId/performances","type":0,"val":"sessions","end":""},{"old":"/api/v1/sessions/:sessionId/performances","type":1,"val":"sessionId","end":""},{"old":"/api/v1/sessions/:sessionId/performances","type":0,"val":"performances","end":""}],
+    types: placeholder as Registry['performances.store']['types'],
+  },
+  'performances.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/sessions/:sessionId/performances',
+    tokens: [{"old":"/api/v1/sessions/:sessionId/performances","type":0,"val":"api","end":""},{"old":"/api/v1/sessions/:sessionId/performances","type":0,"val":"v1","end":""},{"old":"/api/v1/sessions/:sessionId/performances","type":0,"val":"sessions","end":""},{"old":"/api/v1/sessions/:sessionId/performances","type":1,"val":"sessionId","end":""},{"old":"/api/v1/sessions/:sessionId/performances","type":0,"val":"performances","end":""}],
+    types: placeholder as Registry['performances.index']['types'],
+  },
 } as const satisfies Record<string, AdonisEndpoint>
 
 export { routes }

@@ -223,4 +223,76 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/schedules_controller').default['destroy']>>>
     }
   }
+  'workout_sessions.store': {
+    methods: ["POST"]
+    pattern: '/api/v1/workouts/:workoutId/sessions'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { workoutId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/workout_sessions_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/workout_sessions_controller').default['store']>>>
+    }
+  }
+  'workout_sessions.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/sessions'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/workout_sessions_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/workout_sessions_controller').default['index']>>>
+    }
+  }
+  'workout_sessions.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/sessions/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/workout_sessions_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/workout_sessions_controller').default['show']>>>
+    }
+  }
+  'workout_sessions.update': {
+    methods: ["PATCH"]
+    pattern: '/api/v1/sessions/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/workout_sessions_controller').default['update']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/workout_sessions_controller').default['update']>>>
+    }
+  }
+  'performances.store': {
+    methods: ["POST"]
+    pattern: '/api/v1/sessions/:sessionId/performances'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/performance').createPerformanceValidator)>>
+      paramsTuple: [ParamValue]
+      params: { sessionId: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/performance').createPerformanceValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/performances_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/performances_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'performances.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/sessions/:sessionId/performances'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { sessionId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/performances_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/performances_controller').default['index']>>>
+    }
+  }
 }

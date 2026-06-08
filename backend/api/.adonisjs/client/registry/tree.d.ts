@@ -38,4 +38,14 @@ export interface ApiDefinition {
     update: typeof routes['schedules.update']
     destroy: typeof routes['schedules.destroy']
   }
+  workoutSessions: {
+    store: typeof routes['workout_sessions.store']
+    index: typeof routes['workout_sessions.index']
+    show: typeof routes['workout_sessions.show']
+    update: typeof routes['workout_sessions.update']
+  }
+  performances: {
+    store: typeof routes['performances.store']
+    index: typeof routes['performances.index']
+  }
 }
