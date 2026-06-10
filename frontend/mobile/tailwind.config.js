@@ -9,13 +9,12 @@ module.exports = {
   presets: [require('nativewind/preset')],
   theme: {
     extend: {
-      // Ton thème : sombre + accent vert. Utilisables comme bg-background, text-accent...
       colors: {
-        background: '#0F172A', // fond principal (slate-900)
-        card: '#1E293B', // cartes / blocs (slate-800)
-        foreground: '#F1F5F9', // texte principal (presque blanc)
-        muted: '#94A3B8', // texte discret (gris)
-        accent: '#22C55E', // couleur d'accent (vert vif) — boutons, actifs
+        background: '#0A0A0A', // fond principal — noir carbone profond
+        card: '#18181B', // cartes / blocs — carbone légèrement plus clair
+        foreground: '#FAFAFA', // texte principal (presque blanc)
+        muted: '#8E8E93', // texte discret (gris carbone)
+        accent: '#44D62C', // vert énergique — boutons, actifs, accents
       },
     },
   },
