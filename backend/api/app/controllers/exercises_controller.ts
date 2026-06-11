@@ -10,10 +10,10 @@ export default class ExercisesController {
     async store({ auth, request, params }: HttpContext) {
         const user = auth.getUserOrFail()
         const workout = await Workout.query()
-                    .where('userId', user.id)
-                                .where('id', params.workoutId)
-                                            .firstOrFail()
-                                                    const { name, sets, reps, weight, restTime, notes } = await request.validateUsing(createExerciseValidator)
+            .where('userId', user.id)
+            .where('id', params.workoutId)
+            .firstOrFail()
+             const { name, sets, reps, weight, restTime, notes } = await request.validateUsing(createExerciseValidator)
         const exercise = await workout.related('exercises').create({ name, sets, reps, weight: weight?.toString(), restTime, notes })
         return exercise
     }
