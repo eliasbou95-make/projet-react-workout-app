@@ -2,28 +2,31 @@ import { useRef, useState  } from 'react';
 import { View, Text, Pressable, Modal, TextInput  } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
- import { useMutation ,useQuery, useQueryClient} from '@tanstack/react-query';
- import api from '../api/client';
+import { useMutation ,useQuery, useQueryClient} from '@tanstack/react-query';
+import api from '../api/client';
 
 
 export default function SeancesScreen() {
   const [ongletActif, setOngletActif] = useState('gestion');
-  const [seances, setSeances] = useState([
-  { id: 1, nom: 'Push', couleur: '#0f8000' },   
-  { id: 2, nom: 'Pull', couleur: '#F59E0B' },   
-  { id: 3, nom: 'Legs', couleur: '#22C55E' },   
-]);
   const [modalVisible,setModalVisible] = useState(false);
   const [nom , setNom] = useState("");
   const jours = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
   const zones = useRef({});
   const queryClient = useQueryClient();
-  const mutation = useMutation({
+  const mutation_ajout = useMutation({
     mutationFn: (nouveau) =>
   api.post('/workouts',nouveau),
     onSuccess:() => {
       queryClient.invalidateQueries({queryKey: ["workouts"]})
     }
+  })
+  const mutation_suppresion = useMutation({
+    mutationFn: (supprimé) =>
+      api.delete(`/workouts/${supprimé}`),
+    onSuccess:() => {
+      queryClient.invalidateQueries({queryKey: ['workouts']})
+    }
+
   })
 
   const {data,isLoading} = useQuery({
@@ -55,8 +58,7 @@ export default function SeancesScreen() {
   }
 
   function ajouterSeance() {
-    setSeances([...seances, {id: Date.now(), nom: nom, couleur:'#003cff'}])
-    mutation.mutate({name:nom})
+    mutation_ajout.mutate({name:nom})
     setNom('')
     setModalVisible(false);
   }
@@ -105,7 +107,7 @@ export default function SeancesScreen() {
           <View className="flex-1 items-center">
             <View className="flex-row flex-wrap gap-3">
               {data?.map((seance) => (
-                <PastilleDraggable key={seance.id} seance={seance} trouverJour={trouverJour} />
+                <PastilleDraggable key={seance.id} seance={seance} trouverJour={trouverJour} supprimerJour={(id) => mutation_suppresion.mutate(id)} />
               ))}
             </View>
           </View>
@@ -125,7 +127,7 @@ export default function SeancesScreen() {
   );
 }
 
-function PastilleDraggable({ seance, trouverJour }) {
+function PastilleDraggable({ seance, trouverJour , supprimerJour }) {
 
   const offsetX = useSharedValue(0);
   const offsetY = useSharedValue(0);
@@ -146,10 +148,15 @@ function PastilleDraggable({ seance, trouverJour }) {
   return (
     <GestureDetector gesture={pan}>
       <Animated.View className="items-center" style={styleAnime}>
-        <View
-          className="w-10 h-10 rounded-full"
-          style={{ backgroundColor: seance.couleur ?? '#44D62C' }}
-        />
+        <View className="relative">
+          <View
+            className="w-10 h-10 rounded-full"
+            style={{ backgroundColor: seance.couleur ?? '#44D62C' }}
+          />
+          <Pressable onPress={() => supprimerJour(seance.id)} className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 items-center justify-center">
+            <Text className="text-white text-[10px] leading-none">×</Text>
+          </Pressable>
+        </View>
         <Text className="text-foreground">{seance.name}</Text>
       </Animated.View>
     </GestureDetector>
