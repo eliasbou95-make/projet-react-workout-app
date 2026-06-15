@@ -136,10 +136,12 @@ export class WorkoutSessionSchema extends BaseModel {
 }
 
 export class WorkoutSchema extends BaseModel {
-  static $columns = ['createdAt', 'id', 'name', 'updatedAt', 'userId'] as const
+  static $columns = ['createdAt', 'icon', 'id', 'name', 'updatedAt', 'userId'] as const
   $columns = WorkoutSchema.$columns
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime | null
+  @column()
+  declare icon: string | null
   @column({ isPrimary: true })
   declare id: number
   @column()

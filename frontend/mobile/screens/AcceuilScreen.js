@@ -1,7 +1,7 @@
 import { View, Text, Dimensions, Pressable } from 'react-native';
 import {Calendar , CalendarList} from 'react-native-calendars';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '../api/client';
@@ -11,39 +11,61 @@ const largeurEcran = Dimensions.get('window').width;
 // sur le web la fenêtre est très large → on plafonne à 380px
 const largeurCalendrier = Math.min(largeurEcran, 380);
 const theme_calendrier = {
-    // --- couleurs générales ---
-    calendarBackground: 'transparent', // laisse passer le dégradé derrière
-    monthTextColor: '#FFFFFF',         // titre du mois en blanc
-    textSectionTitleColor: '#FFFFFF',  // initiales L M M J... en blanc
-    arrowColor: '#FFFFFF',             // flèches en blanc
-    todayTextColor: '#44D62C',         // aujourd'hui en vert
-    textDisabledColor: '#aaaaaa',      // jours du mois voisin (gris sombre)
+    calendarBackground: 'transparent', 
+    monthTextColor: '#FFFFFF',         
+    textSectionTitleColor: '#FFFFFF',  
+    arrowColor: '#FFFFFF',             
+    todayTextColor: '#44D62C',         
+    textDisabledColor: '#aaaaaa',      
   }
 
-// une case du calendrier, dessinée par nous
-function CaseJour({ date, state, planning }) {
+function CaseJour({ date, state, planning, seances }) {
   const horsMois = state === 'disabled';
   const jsJour = new Date(date.year, date.month - 1, date.day).getDay();
   const jourSemaine = jsJour === 0 ? 7 : jsJour;
   const planif = planning?.find((p) => p.dayOfWeek === jourSemaine);
-  console.log(date.dateString, 'planif =', planif);
+  // si ce jour est planifié, on retrouve la séance correspondante
+  const seance = planif ? seances?.find((s) => s.id === planif.workoutId) : null;
   return (
     <Pressable
       style={({ pressed, hovered }) => {
-        const actif = pressed || hovered;   
+        const actif = pressed || hovered;
         return {
           width: 44,
           height: 56,
           padding: 4,
           margin: 2,
           borderRadius: 10,
-          alignItems: 'flex-end',     
-          justifyContent: 'flex-end', 
+          alignItems: 'flex-end',
+          justifyContent: 'flex-end',
           borderWidth: actif ? 2 : 1,
           borderColor: actif ? '#44D62C' : (horsMois ? '#3A3A3A' : '#FFFFFF'),
         };
       }}
     >
+      {/* pastille du jour planifié*/}
+      {seance && !horsMois && (
+        seance.icon ? (
+          <MaterialCommunityIcons
+            name={seance.icon}
+            size={18}
+            color={seance.couleur ?? '#44D62C'}
+            style={{ position: 'absolute', top: 3, left: 3 }}
+          />
+        ) : (
+          <View
+            style={{
+              position: 'absolute',
+              top: 4,
+              left: 4,
+              width: 16,
+              height: 16,
+              borderRadius: 8,
+              backgroundColor: seance.couleur ?? '#44D62C',
+            }}
+          />
+        )
+      )}
       <Text style={{ fontSize: 10, color: horsMois ? '#3A3A3A' : '#FFFFFF' }}>
         {date.day}
       </Text>
@@ -101,7 +123,7 @@ export default function AcceuilScreen() {
           hideExtraDays={false}
           calendarWidth={largeurCalendrier}
           theme={theme_calendrier}
-          dayComponent={(props) => <CaseJour {...props} planning={planning} />}
+          dayComponent={(props) => <CaseJour {...props} planning={planning} seances={seances} />}
         />
       </View>
     </LinearGradient>

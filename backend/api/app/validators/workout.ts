@@ -6,4 +6,5 @@ import vine from '@vinejs/vine'
  */
 export const createWorkoutValidator = vine.create({
   name: vine.string().trim().minLength(1).maxLength(100),
+  icon: vine.string().trim().optional(),
 })
