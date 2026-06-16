@@ -13,8 +13,8 @@ export default class WorkoutsController {
     //crée un nouveau workout pour l'utilisateur connecté
     async store ({auth, request}: HttpContext) {
         const user = auth.getUserOrFail()                                  // ① qui crée ?
-        const { name } = await request.validateUsing(createWorkoutValidator) // ② valide l'entrée
-        const workout = await Workout.create({ name, userId: user.id })    // ③ écrit en base
+        const { name, icon } = await request.validateUsing(createWorkoutValidator) // ② valide l'entrée
+        const workout = await Workout.create({ name, icon, userId: user.id })    // ③ écrit en base
         return workout                                                     // ④ renvoie le créé
     }
 
@@ -45,8 +45,9 @@ export default class WorkoutsController {
             .where('userId', user.id)                     
             .where('id', params.id)                        
             .firstOrFail() 
-        const { name } = await request.validateUsing(createWorkoutValidator)
-        workout.name = name 
+        const { name, icon } = await request.validateUsing(createWorkoutValidator)
+        workout.name = name
+        if (icon !== undefined) workout.icon = icon
         await workout.save()
         return workout
     }
