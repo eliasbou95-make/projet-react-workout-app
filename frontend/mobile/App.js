@@ -1,10 +1,12 @@
 import "./global.css"
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AcceuilScreen from './screens/AcceuilScreen';
 import SeancesScreen from './screens/SeancesScreen';
 import CompteScreen from './screens/CompteScreen';
 import ReglagesScreen from './screens/ReglagesScreen';
+import WorkoutScreen from './screens/WorkoutScreen';
 import { Ionicons } from '@expo/vector-icons';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -13,7 +15,36 @@ import { View, Text } from 'react-native';
 import { loadAuthToken } from './api/client';
 
 const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
 const queryClient = new QueryClient();
+
+// les 4 onglets du bas (ton appli habituelle)
+function Onglets() {
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        tabBarActiveTintColor: '#44D62C',
+        tabBarInactiveTintColor: '#8E8E93',
+        tabBarStyle: { backgroundColor: '#0A0A0A', borderTopColor: '#44D62C' },
+        headerStyle: { backgroundColor: '#0A0A0A' },
+        headerTintColor: '#FAFAFA',
+      }}
+    >
+      <Tab.Screen name="Compte" component={CompteScreen} options={{tabBarIcon: ({color, size}) => (
+        <Ionicons name="person" color={color} size={size}/>
+      )}} />
+      <Tab.Screen name="Séances" component={SeancesScreen} options={{tabBarIcon: ({color, size}) => (
+        <Ionicons name="barbell" color={color} size={size}/>
+      )}}/>
+      <Tab.Screen name="Accueil" component={AcceuilScreen} options={{tabBarIcon: ({color, size}) => (
+        <Ionicons name="home" color={color} size={size}/>
+      )}} />
+      <Tab.Screen name="Réglages" component={ReglagesScreen} options={{tabBarIcon: ({color, size}) => (
+        <Ionicons name="settings" color={color} size={size}/>
+      )}} />
+    </Tab.Navigator>
+  );
+}
 
 export default function App() {
   const [pret, setPret] = useState(false); // a-t-on fini de lire le coffre ?
@@ -36,28 +67,10 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
     <GestureHandlerRootView style={{ flex: 1 }}>
       <NavigationContainer>
-        <Tab.Navigator
-          screenOptions={{
-            tabBarActiveTintColor: '#44D62C',
-            tabBarInactiveTintColor: '#8E8E93',
-            tabBarStyle: { backgroundColor: '#0A0A0A', borderTopColor: '#44D62C' },
-            headerStyle: { backgroundColor: '#0A0A0A' },
-            headerTintColor: '#FAFAFA',
-          }}
-        >
-          <Tab.Screen name="Compte" component={CompteScreen} options={{tabBarIcon: ({color, size}) => (
-            <Ionicons name="person" color={color} size={size}/>
-          )}} />
-          <Tab.Screen name="Séances" component={SeancesScreen} options={{tabBarIcon: ({color, size}) => (
-            <Ionicons name="barbell" color={color} size={size}/>
-          )}}/>
-          <Tab.Screen name="Accueil" component={AcceuilScreen} options={{tabBarIcon: ({color, size}) => (
-            <Ionicons name="home" color={color} size={size}/>
-          )}} />
-          <Tab.Screen name="Réglages" component={ReglagesScreen} options={{tabBarIcon: ({color, size}) => (
-            <Ionicons name="settings" color={color} size={size}/>
-          )}} />
-        </Tab.Navigator>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Onglets" component={Onglets} />
+          <Stack.Screen name="Workout" component={WorkoutScreen} />
+        </Stack.Navigator>
       </NavigationContainer>
     </GestureHandlerRootView>
     </QueryClientProvider>
