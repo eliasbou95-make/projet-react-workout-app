@@ -5,6 +5,7 @@
 
 export const controllers = {
   AccessTokens: () => import('#controllers/access_tokens_controller'),
+  CycleDays: () => import('#controllers/cycle_days_controller'),
   Exercises: () => import('#controllers/exercises_controller'),
   NewAccount: () => import('#controllers/new_account_controller'),
   Performances: () => import('#controllers/performances_controller'),

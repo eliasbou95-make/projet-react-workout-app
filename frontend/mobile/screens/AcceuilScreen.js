@@ -3,7 +3,7 @@ import {Calendar , CalendarList} from 'react-native-calendars';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRef, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import api from '../api/client';
 import { useNavigation } from '@react-navigation/native';
 
@@ -99,6 +99,15 @@ export default function AcceuilScreen() {
     queryFn: () => api.get('workouts').then((res) => res.data),
   });
 
+  // crée la session UNE fois, puis lance WorkoutScreen avec son id
+  const mutation_session = useMutation({
+    mutationFn: (workoutId) => api.post(`/workouts/${workoutId}/sessions`).then((res) => res.data),
+    onSuccess: (session) => {
+      navigation.navigate('Workout', { seance: seanceOuverte, sessionId: session.id, index: 0 });
+      setSeanceOuverte(null);
+    },
+  });
+
   console.log('planning', planning);
   console.log('seances', seances);
 
@@ -143,7 +152,7 @@ export default function AcceuilScreen() {
         </Pressable>
       </View>
 
-      <View style={{ height: 460, width: largeurCalendrier, alignSelf: 'center' }}>
+      <View style={{ height: 640, width: largeurCalendrier, alignSelf: 'center' }}>
         <CalendarList
           ref={refCalendrier}
           horizontal
@@ -201,10 +210,7 @@ export default function AcceuilScreen() {
 
             <Pressable
               className="bg-accent rounded-2xl py-4 w-full flex-row items-center justify-center gap-2"
-              onPress={() => {
-                navigation.navigate('Workout', { seance: seanceOuverte });
-                setSeanceOuverte(null);
-              }}
+              onPress={() => mutation_session.mutate(seanceOuverte.id)}
             >
               <MaterialCommunityIcons name="play" size={22} color="#0A0A0A" />
               <Text className="text-background font-bold text-base">Commencer l'entraînement</Text>

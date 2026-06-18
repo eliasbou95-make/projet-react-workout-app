@@ -223,6 +223,42 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/schedules_controller').default['destroy']>>>
     }
   }
+  'cycle_days.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/cycle'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/cycle_days_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/cycle_days_controller').default['index']>>>
+    }
+  }
+  'cycle_days.store': {
+    methods: ["POST"]
+    pattern: '/api/v1/cycle'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/cycle_day').createCycleDayValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/cycle_day').createCycleDayValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/cycle_days_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/cycle_days_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'cycle_days.destroy': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/cycle/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/cycle_days_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/cycle_days_controller').default['destroy']>>>
+    }
+  }
   'workout_sessions.store': {
     methods: ["POST"]
     pattern: '/api/v1/workouts/:workoutId/sessions'
@@ -293,6 +329,18 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/performances_controller').default['index']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/performances_controller').default['index']>>>
+    }
+  }
+  'performances.last': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/exercises/:exerciseId/last-performance'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { exerciseId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/performances_controller').default['last']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/performances_controller').default['last']>>>
     }
   }
 }

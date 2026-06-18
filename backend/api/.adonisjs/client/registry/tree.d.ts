@@ -38,6 +38,11 @@ export interface ApiDefinition {
     update: typeof routes['schedules.update']
     destroy: typeof routes['schedules.destroy']
   }
+  cycleDays: {
+    index: typeof routes['cycle_days.index']
+    store: typeof routes['cycle_days.store']
+    destroy: typeof routes['cycle_days.destroy']
+  }
   workoutSessions: {
     store: typeof routes['workout_sessions.store']
     index: typeof routes['workout_sessions.index']
@@ -47,5 +52,6 @@ export interface ApiDefinition {
   performances: {
     store: typeof routes['performances.store']
     index: typeof routes['performances.index']
+    last: typeof routes['performances.last']
   }
 }

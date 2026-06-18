@@ -114,6 +114,24 @@ const routes = {
     tokens: [{"old":"/api/v1/schedules/:id","type":0,"val":"api","end":""},{"old":"/api/v1/schedules/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/schedules/:id","type":0,"val":"schedules","end":""},{"old":"/api/v1/schedules/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['schedules.destroy']['types'],
   },
+  'cycle_days.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/cycle',
+    tokens: [{"old":"/api/v1/cycle","type":0,"val":"api","end":""},{"old":"/api/v1/cycle","type":0,"val":"v1","end":""},{"old":"/api/v1/cycle","type":0,"val":"cycle","end":""}],
+    types: placeholder as Registry['cycle_days.index']['types'],
+  },
+  'cycle_days.store': {
+    methods: ["POST"],
+    pattern: '/api/v1/cycle',
+    tokens: [{"old":"/api/v1/cycle","type":0,"val":"api","end":""},{"old":"/api/v1/cycle","type":0,"val":"v1","end":""},{"old":"/api/v1/cycle","type":0,"val":"cycle","end":""}],
+    types: placeholder as Registry['cycle_days.store']['types'],
+  },
+  'cycle_days.destroy': {
+    methods: ["DELETE"],
+    pattern: '/api/v1/cycle/:id',
+    tokens: [{"old":"/api/v1/cycle/:id","type":0,"val":"api","end":""},{"old":"/api/v1/cycle/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/cycle/:id","type":0,"val":"cycle","end":""},{"old":"/api/v1/cycle/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['cycle_days.destroy']['types'],
+  },
   'workout_sessions.store': {
     methods: ["POST"],
     pattern: '/api/v1/workouts/:workoutId/sessions',
@@ -149,6 +167,12 @@ const routes = {
     pattern: '/api/v1/sessions/:sessionId/performances',
     tokens: [{"old":"/api/v1/sessions/:sessionId/performances","type":0,"val":"api","end":""},{"old":"/api/v1/sessions/:sessionId/performances","type":0,"val":"v1","end":""},{"old":"/api/v1/sessions/:sessionId/performances","type":0,"val":"sessions","end":""},{"old":"/api/v1/sessions/:sessionId/performances","type":1,"val":"sessionId","end":""},{"old":"/api/v1/sessions/:sessionId/performances","type":0,"val":"performances","end":""}],
     types: placeholder as Registry['performances.index']['types'],
+  },
+  'performances.last': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/exercises/:exerciseId/last-performance',
+    tokens: [{"old":"/api/v1/exercises/:exerciseId/last-performance","type":0,"val":"api","end":""},{"old":"/api/v1/exercises/:exerciseId/last-performance","type":0,"val":"v1","end":""},{"old":"/api/v1/exercises/:exerciseId/last-performance","type":0,"val":"exercises","end":""},{"old":"/api/v1/exercises/:exerciseId/last-performance","type":1,"val":"exerciseId","end":""},{"old":"/api/v1/exercises/:exerciseId/last-performance","type":0,"val":"last-performance","end":""}],
+    types: placeholder as Registry['performances.last']['types'],
   },
 } as const satisfies Record<string, AdonisEndpoint>
 

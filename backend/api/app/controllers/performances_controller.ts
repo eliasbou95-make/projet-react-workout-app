@@ -33,4 +33,16 @@ export default class PerformancesController {
         return performances
     }
 
+    async last({auth, params} : HttpContext) {
+        const user = auth.getUserOrFail()
+        const performance = await Performance.query()
+            .where('exerciseId', params.exerciseId)
+            .whereIn('sessionId', (sub) => {
+                sub.from('workout_sessions').select('id').where('user_id', user.id)
+            })
+            .orderBy('createdAt', 'desc')
+            .first()
+        return performance
+    }
+
 }

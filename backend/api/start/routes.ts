@@ -68,6 +68,15 @@ router
         })
         .use(middleware.auth())
 
+// groupe cycle (nouveau planning qui boucle)
+      router
+        .group(() => {
+          router.get('cycle', [controllers.CycleDays, 'index'])
+          router.post('cycle', [controllers.CycleDays, 'store'])
+          router.delete('cycle/:id', [controllers.CycleDays, 'destroy'])
+        })
+        .use(middleware.auth())
+
   // groupe workout_sessions
   router
         .group(() => {
@@ -83,6 +92,7 @@ router
         .group(() => {
           router.post('sessions/:sessionId/performances', [controllers.Performances, 'store'])
           router.get('sessions/:sessionId/performances', [controllers.Performances, 'index'])
+          router.get('exercises/:exerciseId/last-performance', [controllers.Performances, 'last'])
         })
         .use(middleware.auth())
 

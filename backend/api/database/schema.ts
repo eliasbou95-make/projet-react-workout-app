@@ -32,6 +32,23 @@ export class AuthAccessTokenSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class CycleDaySchema extends BaseModel {
+  static $columns = ['createdAt', 'id', 'position', 'updatedAt', 'userId', 'workoutId'] as const
+  $columns = CycleDaySchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare position: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number | null
+  @column()
+  declare workoutId: number | null
+}
+
 export class ExerciseSchema extends BaseModel {
   static $columns = ['createdAt', 'id', 'name', 'notes', 'position', 'reps', 'restTime', 'sets', 'updatedAt', 'weight', 'workoutId'] as const
   $columns = ExerciseSchema.$columns
@@ -100,10 +117,12 @@ export class ScheduleSchema extends BaseModel {
 }
 
 export class UserSchema extends BaseModel {
-  static $columns = ['createdAt', 'email', 'fullName', 'id', 'password', 'updatedAt'] as const
+  static $columns = ['createdAt', 'cycleStartDate', 'email', 'fullName', 'id', 'password', 'updatedAt'] as const
   $columns = UserSchema.$columns
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
+  @column.date()
+  declare cycleStartDate: DateTime | null
   @column()
   declare email: string
   @column()

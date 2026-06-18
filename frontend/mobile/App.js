@@ -7,6 +7,11 @@ import SeancesScreen from './screens/SeancesScreen';
 import CompteScreen from './screens/CompteScreen';
 import ReglagesScreen from './screens/ReglagesScreen';
 import WorkoutScreen from './screens/WorkoutScreen';
+import DataScreen from "./screens/DataScreen";
+import DataScreen2 from "./screens/DataScreen2";
+import TimerScreen_Serie from "./screens/TimerScreen_Serie";
+import TimerScreen_exercise from "./screens/TimerScreen_exercise";
+import SummaryScreen from "./screens/SummaryScreen";
 import { Ionicons } from '@expo/vector-icons';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -70,6 +75,12 @@ export default function App() {
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Onglets" component={Onglets} />
           <Stack.Screen name="Workout" component={WorkoutScreen} />
+          <Stack.Screen name="Data" component={DataScreen} />
+          <Stack.Screen name="Timer_serie" component={TimerScreen_Serie} />
+          <Stack.Screen name="Data2" component={DataScreen2} />
+          <Stack.Screen name="Timer_exercise" component={TimerScreen_exercise} />
+          <Stack.Screen name="Summary" component={SummaryScreen} />
+
         </Stack.Navigator>
       </NavigationContainer>
     </GestureHandlerRootView>
