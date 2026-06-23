@@ -41,13 +41,27 @@ export interface ApiDefinition {
   cycleDays: {
     index: typeof routes['cycle_days.index']
     store: typeof routes['cycle_days.store']
+    setStartDate: typeof routes['cycle_days.set_start_date']
+    setRepeat: typeof routes['cycle_days.set_repeat']
+    setEndRest: typeof routes['cycle_days.set_end_rest']
     destroy: typeof routes['cycle_days.destroy']
+  }
+  exerciseDefinitions: {
+    index: typeof routes['exercise_definitions.index']
+    store: typeof routes['exercise_definitions.store']
+    progression: typeof routes['exercise_definitions.progression']
+    destroy: typeof routes['exercise_definitions.destroy']
   }
   workoutSessions: {
     store: typeof routes['workout_sessions.store']
+    skip: typeof routes['workout_sessions.skip']
+    complete: typeof routes['workout_sessions.complete']
+    reset: typeof routes['workout_sessions.reset']
     index: typeof routes['workout_sessions.index']
     show: typeof routes['workout_sessions.show']
     update: typeof routes['workout_sessions.update']
+    destroyAll: typeof routes['workout_sessions.destroy_all']
+    destroy: typeof routes['workout_sessions.destroy']
   }
   performances: {
     store: typeof routes['performances.store']

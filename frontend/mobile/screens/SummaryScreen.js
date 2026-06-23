@@ -64,9 +64,17 @@ export default function SummaryScreen({ route, navigation }) {
           );
         })}
 
-        <Pressable className="rounded-2xl py-4 mt-4 flex-row items-center justify-center" style={{ backgroundColor: couleur }} onPress={() => mutation_finir.mutate()}>
-          <MaterialCommunityIcons name="flag-checkered" size={22} color="#0A0A0A" />
-          <Text className="text-background font-bold text-base ml-2">Finir la séance</Text>
+        <Pressable className="mt-4" onPress={() => mutation_finir.mutate()}>
+          <LinearGradient
+            colors={['#1E1E20', '#0D0D0E']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            className="rounded-2xl py-4 flex-row items-center justify-center border"
+            style={{ borderColor: `${couleur}99`, boxShadow: `0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px ${couleur}66` }}
+          >
+            <MaterialCommunityIcons name="flag-checkered" size={22} color={couleur} />
+            <Text className="font-bold text-base ml-2" style={{ color: couleur }}>Finir la séance</Text>
+          </LinearGradient>
         </Pressable>
       </ScrollView>
     </LinearGradient>

@@ -45,13 +45,17 @@ export default function TimerScreen({ route, navigation }) {
         <Text className="text-muted uppercase tracking-widest text-xs mb-2">Temps de repos</Text>
         <Text className="text-foreground text-6xl font-bold mb-12">{minutes}:{sec}</Text>
 
-        <Pressable
-          className="rounded-2xl py-4 px-12 flex-row items-center justify-center"
-          style={{ backgroundColor: couleur }}
-          onPress={() => mutation_perf.mutate()}
-        >
-          <MaterialCommunityIcons name="check" size={22} color="#0A0A0A" />
-          <Text className="text-background font-bold text-base ml-2">Continuer</Text>
+        <Pressable onPress={() => mutation_perf.mutate()}>
+          <LinearGradient
+            colors={['#1E1E20', '#0D0D0E']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            className="rounded-2xl py-4 px-12 flex-row items-center justify-center border"
+            style={{ borderColor: `${couleur}99`, boxShadow: `0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px ${couleur}66` }}
+          >
+            <MaterialCommunityIcons name="check" size={22} color={couleur} />
+            <Text className="font-bold text-base ml-2" style={{ color: couleur }}>Continuer</Text>
+          </LinearGradient>
         </Pressable>
       </View>
     </LinearGradient>

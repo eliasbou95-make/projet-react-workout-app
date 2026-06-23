@@ -67,9 +67,17 @@ export default function DataScreen({ route, navigation }) {
                 <Text className="text-muted text-sm mb-2">Poids (kg)</Text>
                 <TextInput value={poids} onChangeText={setPoids} placeholder='ex. 50' placeholderTextColor='#8E8E93' keyboardType='numeric' style={inputStyle} className='bg-card text-foreground rounded-xl px-4 py-3 mb-8' />
 
-                <Pressable className="rounded-2xl py-4 flex-row items-center justify-center" style={{ backgroundColor: couleur }} onPress={lancerRepos}>
-                    <MaterialCommunityIcons name="timer-outline" size={22} color="#0A0A0A" />
-                    <Text className="text-background font-bold text-base ml-2">Valider & temps de repos</Text>
+                <Pressable onPress={lancerRepos}>
+                    <LinearGradient
+                        colors={['#1E1E20', '#0D0D0E']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 0, y: 1 }}
+                        className="rounded-2xl py-4 flex-row items-center justify-center border"
+                        style={{ borderColor: `${couleur}99`, boxShadow: `0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px ${couleur}66` }}
+                    >
+                        <MaterialCommunityIcons name="timer-outline" size={22} color={couleur} />
+                        <Text className="font-bold text-base ml-2" style={{ color: couleur }}>Valider & temps de repos</Text>
+                    </LinearGradient>
                 </Pressable>
             </View>
         </LinearGradient>

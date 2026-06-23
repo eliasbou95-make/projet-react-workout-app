@@ -1,6 +1,6 @@
 import Workout from "#models/workout";
 import CycleDay from "#models/cycle_day";
-import { createCycleDayValidator } from "#validators/cycle_day";
+import { createCycleDayValidator, setCycleStartDateValidator, setCycleRepeatValidator, setCycleEndRestValidator } from "#validators/cycle_day";
 import { HttpContext } from "@adonisjs/core/http";
 import { DateTime } from "luxon";
 
@@ -28,6 +28,33 @@ export default class CycleDaysController {
     }
 
     return CycleDay.create({ userId: user.id, position, workoutId: workoutId ?? null })
+  }
+
+  // change la date de début du cycle (le point d'ancrage sur le calendrier)
+  async setStartDate({ auth, request }: HttpContext) {
+    const user = auth.getUserOrFail()
+    const { cycleStartDate } = await request.validateUsing(setCycleStartDateValidator)
+    user.cycleStartDate = DateTime.fromISO(cycleStartDate)
+    await user.save()
+    return user
+  }
+
+  // change le nombre de répétitions du cycle (null = infini)
+  async setRepeat({ auth, request }: HttpContext) {
+    const user = auth.getUserOrFail()
+    const { cycleRepeat } = await request.validateUsing(setCycleRepeatValidator)
+    user.cycleRepeat = cycleRepeat ?? null
+    await user.save()
+    return user
+  }
+
+  // active/désactive le jour de repos automatique en fin de cycle
+  async setEndRest({ auth, request }: HttpContext) {
+    const user = auth.getUserOrFail()
+    const { cycleEndRest } = await request.validateUsing(setCycleEndRestValidator)
+    user.cycleEndRest = cycleEndRest
+    await user.save()
+    return user
   }
 
   // supprime un jour du cycle

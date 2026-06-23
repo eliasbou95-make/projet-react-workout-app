@@ -13,4 +13,5 @@ export const controllers = {
   Schedules: () => import('#controllers/schedules_controller'),
   WorkoutSessions: () => import('#controllers/workout_sessions_controller'),
   Workouts: () => import('#controllers/workouts_controller'),
+  ExerciseDefinitions: () => import('#controllers/exercise_definitions_controller'),
 }

@@ -2,6 +2,7 @@ import { createExerciseValidator } from "#validators/exercise";
 import type { HttpContext } from "@adonisjs/core/http";
 import Workout from "#models/workout";
 import Exercise from "#models/exercise";
+import ExerciseDefinition from "#models/exercise_definition";
 import { updateExerciseValidator } from "#validators/exercise";
 
 export default class ExercisesController {
@@ -13,8 +14,18 @@ export default class ExercisesController {
             .where('userId', user.id)
             .where('id', params.workoutId)
             .firstOrFail()
-             const { name, sets, reps, weight, restTime, notes } = await request.validateUsing(createExerciseValidator)
-        const exercise = await workout.related('exercises').create({ name, sets, reps, weight: weight?.toString(), restTime, notes })
+             let { name, sets, reps, weight, restTime, notes, definitionId } = await request.validateUsing(createExerciseValidator)
+
+        // auto-homologation : si aucune fiche fournie, on la retrouve par nom (même utilisateur)
+        if (!definitionId) {
+            const def = await ExerciseDefinition.query()
+                .where('userId', user.id)
+                .whereRaw('lower(trim(name)) = lower(trim(?))', [name])
+                .first()
+            if (def) definitionId = def.id
+        }
+
+        const exercise = await workout.related('exercises').create({ name, sets, reps, weight: weight?.toString(), restTime, notes, definitionId: definitionId ?? null })
         return exercise
     }
 

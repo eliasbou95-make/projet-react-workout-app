@@ -73,7 +73,20 @@ router
         .group(() => {
           router.get('cycle', [controllers.CycleDays, 'index'])
           router.post('cycle', [controllers.CycleDays, 'store'])
+          router.patch('cycle/start-date', [controllers.CycleDays, 'setStartDate'])
+          router.patch('cycle/repeat', [controllers.CycleDays, 'setRepeat'])
+          router.patch('cycle/end-rest', [controllers.CycleDays, 'setEndRest'])
           router.delete('cycle/:id', [controllers.CycleDays, 'destroy'])
+        })
+        .use(middleware.auth())
+
+// groupe exercise_definitions (fiches d'exercices homologués)
+      router
+        .group(() => {
+          router.get('exercise-definitions', [controllers.ExerciseDefinitions, 'index'])
+          router.post('exercise-definitions', [controllers.ExerciseDefinitions, 'store'])
+          router.get('exercise-definitions/:id/performances', [controllers.ExerciseDefinitions, 'progression'])
+          router.delete('exercise-definitions/:id', [controllers.ExerciseDefinitions, 'destroy'])
         })
         .use(middleware.auth())
 
@@ -81,9 +94,14 @@ router
   router
         .group(() => {
           router.post('workouts/:workoutId/sessions', [controllers.WorkoutSessions, 'store'])
+          router.post('workouts/:workoutId/sessions/skip', [controllers.WorkoutSessions, 'skip'])
+          router.post('workouts/:workoutId/sessions/complete', [controllers.WorkoutSessions, 'complete'])
+          router.post('workouts/:workoutId/sessions/reset', [controllers.WorkoutSessions, 'reset'])
           router.get('sessions', [controllers.WorkoutSessions, 'index'])
           router.get('sessions/:id', [controllers.WorkoutSessions, 'show'])
           router.patch('sessions/:id', [controllers.WorkoutSessions, 'update'])
+          router.delete('sessions', [controllers.WorkoutSessions, 'destroyAll'])
+          router.delete('sessions/:id', [controllers.WorkoutSessions, 'destroy'])
         })
         .use(middleware.auth())
 

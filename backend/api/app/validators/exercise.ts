@@ -7,7 +7,8 @@ export const createExerciseValidator = vine.create({
   reps: vine.number().min(1).max(999).optional(),
   weight: vine.number().min(0).max(999).optional(),
   restTime: vine.number().min(0).max(999).optional(),
-  notes: vine.string().trim().minLength(1).optional()
+  notes: vine.string().trim().minLength(1).optional(),
+  definitionId: vine.number().min(1).nullable().optional()
 })
 
 export const updateExerciseValidator = vine.create({

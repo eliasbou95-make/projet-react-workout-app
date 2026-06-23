@@ -49,11 +49,30 @@ export class CycleDaySchema extends BaseModel {
   declare workoutId: number | null
 }
 
+export class ExerciseDefinitionSchema extends BaseModel {
+  static $columns = ['createdAt', 'icon', 'id', 'name', 'updatedAt', 'userId'] as const
+  $columns = ExerciseDefinitionSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column()
+  declare icon: string | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare name: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number | null
+}
+
 export class ExerciseSchema extends BaseModel {
-  static $columns = ['createdAt', 'id', 'name', 'notes', 'position', 'reps', 'restTime', 'sets', 'updatedAt', 'weight', 'workoutId'] as const
+  static $columns = ['createdAt', 'definitionId', 'id', 'name', 'notes', 'position', 'reps', 'restTime', 'sets', 'updatedAt', 'weight', 'workoutId'] as const
   $columns = ExerciseSchema.$columns
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime | null
+  @column()
+  declare definitionId: number | null
   @column({ isPrimary: true })
   declare id: number
   @column()
@@ -117,10 +136,14 @@ export class ScheduleSchema extends BaseModel {
 }
 
 export class UserSchema extends BaseModel {
-  static $columns = ['createdAt', 'cycleStartDate', 'email', 'fullName', 'id', 'password', 'updatedAt'] as const
+  static $columns = ['createdAt', 'cycleEndRest', 'cycleRepeat', 'cycleStartDate', 'email', 'fullName', 'id', 'password', 'updatedAt'] as const
   $columns = UserSchema.$columns
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
+  @column()
+  declare cycleEndRest: boolean
+  @column()
+  declare cycleRepeat: number | null
   @column.date()
   declare cycleStartDate: DateTime | null
   @column()
@@ -136,7 +159,7 @@ export class UserSchema extends BaseModel {
 }
 
 export class WorkoutSessionSchema extends BaseModel {
-  static $columns = ['completedAt', 'createdAt', 'id', 'startedAt', 'updatedAt', 'userId', 'workoutId'] as const
+  static $columns = ['completedAt', 'createdAt', 'id', 'scheduledDate', 'startedAt', 'status', 'updatedAt', 'userId', 'workoutId'] as const
   $columns = WorkoutSessionSchema.$columns
   @column.dateTime()
   declare completedAt: DateTime | null
@@ -144,8 +167,12 @@ export class WorkoutSessionSchema extends BaseModel {
   declare createdAt: DateTime | null
   @column({ isPrimary: true })
   declare id: number
+  @column.date()
+  declare scheduledDate: DateTime | null
   @column.dateTime()
   declare startedAt: DateTime | null
+  @column()
+  declare status: string | null
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
   @column()

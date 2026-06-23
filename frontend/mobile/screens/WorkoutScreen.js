@@ -84,31 +84,46 @@ export default function WorkoutScreen({ route, navigation }) {
 
         {/* boutons */}
         <Pressable
-          className="rounded-2xl py-4 w-full flex-row items-center justify-center mb-3"
-          style={{ backgroundColor: couleur }}
+          className="w-full mb-3"
           onPress={() => navigation.navigate('Data', { seance, sessionId, exerciceId: exoCourant?.id, index })}
         >
-          <MaterialCommunityIcons name="plus" size={22} color="#0A0A0A" />
-          <Text className="text-background font-bold text-base ml-2">Nouvelle série</Text>
+          <LinearGradient
+            colors={['#1E1E20', '#0D0D0E']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            className="rounded-2xl py-4 w-full flex-row items-center justify-center border"
+            style={{ borderColor: `${couleur}99`, boxShadow: `0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px ${couleur}66` }}
+          >
+            <MaterialCommunityIcons name="plus" size={22} color={couleur} />
+            <Text className="font-bold text-base ml-2" style={{ color: couleur }}>Nouvelle série</Text>
+          </LinearGradient>
         </Pressable>
 
         {estDernier ? (
-          <Pressable
-            className="rounded-2xl py-4 w-full flex-row items-center justify-center"
-            style={{ borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)' }}
-            onPress={() => navigation.navigate('Summary', { seance, sessionId })}
-          >
-            <MaterialCommunityIcons name="flag-checkered" size={20} color="#FAFAFA" />
-            <Text className="text-foreground font-bold text-base ml-2">Terminer la séance</Text>
+          <Pressable className="w-full" onPress={() => navigation.navigate('Summary', { seance, sessionId })}>
+            <LinearGradient
+              colors={['#1E1E20', '#0D0D0E']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              className="rounded-2xl py-4 w-full flex-row items-center justify-center border border-white/15"
+              style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5)' }}
+            >
+              <MaterialCommunityIcons name="flag-checkered" size={20} color="#FAFAFA" />
+              <Text className="text-foreground font-bold text-base ml-2">Terminer la séance</Text>
+            </LinearGradient>
           </Pressable>
         ) : (
-          <Pressable
-            className="rounded-2xl py-4 w-full flex-row items-center justify-center"
-            style={{ borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)' }}
-            onPress={() => navigation.navigate('Data2', { seance, sessionId, exerciceId: exoCourant?.id, index })}
-          >
-            <MaterialCommunityIcons name="arrow-right" size={20} color="#FAFAFA" />
-            <Text className="text-foreground font-bold text-base ml-2">Prochain exercice</Text>
+          <Pressable className="w-full" onPress={() => navigation.navigate('Timer_exercise', { seance, sessionId, index })}>
+            <LinearGradient
+              colors={['#1E1E20', '#0D0D0E']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              className="rounded-2xl py-4 w-full flex-row items-center justify-center border border-white/15"
+              style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5)' }}
+            >
+              <MaterialCommunityIcons name="arrow-right" size={20} color="#FAFAFA" />
+              <Text className="text-foreground font-bold text-base ml-2">Prochain exercice</Text>
+            </LinearGradient>
           </Pressable>
         )}
 
@@ -120,9 +135,18 @@ export default function WorkoutScreen({ route, navigation }) {
               <Text className="text-foreground text-xl font-bold text-center mt-3 mb-2">Quitter la séance ?</Text>
               <Text className="text-muted text-center mb-7">Es-tu sûr de vouloir quitter la séance en cours ?</Text>
 
-              <Pressable className="rounded-2xl py-4 w-full items-center mb-3" style={{ backgroundColor: '#ef4444' }}
+              <Pressable className="w-full mb-3"
                 onPress={() => { setQuitter(false); navigation.navigate('Onglets', { screen: 'Accueil' }); }}>
-                <Text className="text-white font-bold text-base">Oui, quitter</Text>
+                <LinearGradient
+                  colors={['#1E1E20', '#0D0D0E']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 0, y: 1 }}
+                  className="rounded-2xl py-4 w-full flex-row items-center justify-center border"
+                  style={{ borderColor: '#ef444499', boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(239,68,68,0.5)' }}
+                >
+                  <MaterialCommunityIcons name="logout" size={20} color="#ef4444" />
+                  <Text className="font-bold text-base ml-2" style={{ color: '#ef4444' }}>Oui, quitter</Text>
+                </LinearGradient>
               </Pressable>
 
               <Pressable onPress={() => setQuitter(false)} className="py-1">

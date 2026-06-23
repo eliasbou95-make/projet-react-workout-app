@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "PowerShell(npm install *)"
+      "PowerShell(npm install *)",
+      "PowerShell(git *)",
+      "Bash(curl *)",
+      "Bash(node ace *)",
+      "Bash(node *)"
     ]
   }
 }
