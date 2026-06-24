@@ -25,6 +25,7 @@ export default function SeancesScreen() {
   const [modalExo, setModalExo] = useState(false);   // modal de création d'exercice
   const [nomExo, setNomExo] = useState("");
   const [iconeExo, setIconeExo] = useState(null);
+  const champNomRef = useRef(null);                          // pour redonner le focus au champ nom en chaînant
   const [selecteurExo, setSelecteurExo] = useState(false);   // modal pour piger un exo du catalogue
   const [dateCycleOuvert, setDateCycleOuvert] = useState(false);   // modal calendrier (date de début du cycle)
   const [repeatOuvert, setRepeatOuvert] = useState(false);   // modal nombre de répétitions du cycle
@@ -188,13 +189,23 @@ export default function SeancesScreen() {
     setModalVisible(false)
   }
 
-  // crée une fiche d'exercice puis ferme le modal (la liste se rafraîchit via l'invalidation)
-  function creerExo() {
-    if (!nomExo.trim()) return
+  // enregistre la fiche d'exercice et remet le formulaire à blanc ; renvoie false si le nom est vide
+  function enregistrerExo() {
+    if (!nomExo.trim()) return false
     mutation_ajout_exo.mutate({ name: nomExo, icon: iconeExo })
     setNomExo('')
     setIconeExo(null)
-    setModalExo(false)
+    return true
+  }
+
+  // créer puis fermer le modal
+  function creerExo() {
+    if (enregistrerExo()) setModalExo(false)
+  }
+
+  // créer puis enchaîner : on garde le modal ouvert et on redonne le focus au champ nom
+  function creerExoEtSuite() {
+    if (enregistrerExo()) champNomRef.current?.focus()
   }
 
   // le clone suit le doigt (coordonnées absolues de l'écran), décalé de 32 pour être centré
@@ -436,6 +447,7 @@ export default function SeancesScreen() {
             {/* Nom */}
             <Text className="text-muted text-xs uppercase tracking-widest mb-2">Nom</Text>
             <TextInput
+              ref={champNomRef}
               value={nomExo}
               onChangeText={setNomExo}
               placeholder="ex : Squat, Développé couché..."
@@ -464,20 +476,34 @@ export default function SeancesScreen() {
               })}
             </View>
 
-            {/* Boutons */}
-            <Pressable onPress={creerExo} className="mb-3">
-              <LinearGradient
-                colors={['#1E1E20', '#0D0D0E']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 0, y: 1 }}
-                className="rounded-xl py-4 items-center border border-accent/60"
-                style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.4)' }}
-              >
-                <Text className="text-accent font-bold text-base">Créer l'exercice</Text>
-              </LinearGradient>
-            </Pressable>
+            {/* Boutons : "Créer" (ferme) + "+" (crée et enchaîne un autre) */}
+            <View className="flex-row gap-3 mb-2">
+              <Pressable onPress={creerExo} className="flex-1">
+                <LinearGradient
+                  colors={['#1E1E20', '#0D0D0E']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 0, y: 1 }}
+                  className="rounded-xl py-4 items-center border border-accent/60"
+                  style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.4)' }}
+                >
+                  <Text className="text-accent font-bold text-base">Créer l'exercice</Text>
+                </LinearGradient>
+              </Pressable>
+              <Pressable onPress={creerExoEtSuite}>
+                <LinearGradient
+                  colors={['#1E1E20', '#0D0D0E']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 0, y: 1 }}
+                  className="rounded-xl py-4 px-5 items-center justify-center border border-accent/60"
+                  style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.4)' }}
+                >
+                  <MaterialCommunityIcons name="plus" size={24} color="#44D62C" />
+                </LinearGradient>
+              </Pressable>
+            </View>
+            <Text className="text-muted text-xs text-center mb-3">« + » : crée et enchaîne un autre exercice</Text>
             <Pressable onPress={() => setModalExo(false)} className="py-1 items-center">
-              <Text className="text-muted">Annuler</Text>
+              <Text className="text-muted">Terminé</Text>
             </Pressable>
           </Pressable>
         </Pressable>

@@ -47,8 +47,12 @@ function CaseJour({ date, state, cycle, cycleStartDate, cycleRepeat, cycleEndRes
   const sessionJour = seance
     ? sessions?.find((s) => s.workoutId === seance.id && s.scheduledDate?.slice(0, 10) === date.dateString)
     : null;
+  const reset = sessionJour?.status === 'reset';      // jour volontairement remis à zéro
   const fait = !!sessionJour?.completedAt;            // ✓ verte = séance finie
-  const skip = sessionJour?.status === 'skipped';     // ✗ rouge = séance annulée
+  const passe = date.dateString < aujourdStr;         // jour déjà passé
+  // ✗ rouge = séance annulée à la main, OU jour passé avec un workout prévu mais pas fait
+  // (un jour 'reset' n'affiche rien : ni croix automatique, ni check)
+  const skip = !reset && (sessionJour?.status === 'skipped' || (!!seance && passe && !fait));
 
   return (
     <Pressable

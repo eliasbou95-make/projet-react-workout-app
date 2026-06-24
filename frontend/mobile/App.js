@@ -12,13 +12,14 @@ import DataScreen from "./screens/DataScreen";
 import TimerScreen_Serie from "./screens/TimerScreen_Serie";
 import TimerScreen_exercise from "./screens/TimerScreen_exercise";
 import SummaryScreen from "./screens/SummaryScreen";
+import LoginScreen from "./screens/LoginScreen";
 import { Ionicons } from '@expo/vector-icons';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { LinearGradient } from 'expo-linear-gradient';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
-import { loadAuthToken } from './api/client';
+import api, { loadAuthToken } from './api/client';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -107,16 +108,16 @@ function Onglets() {
   );
 }
 
-export default function App() {
-  const [pret, setPret] = useState(false); // a-t-on fini de lire le coffre ?
+// décide quels écrans existent selon que l'utilisateur est connecté ou non
+function Navigation() {
+  // si le profil se charge → connecté ; si la requête échoue (401) → déconnecté
+  const { data: profile, isLoading } = useQuery({
+    queryKey: ['profile'],
+    queryFn: () => api.get('account/profile').then((res) => res.data.data),
+    retry: false,
+  });
 
-  // au démarrage : on relit le token du coffre et on le rebranche, UNE fois
-  useEffect(() => {
-    loadAuthToken().then(() => setPret(true));
-  }, []);
-
-  // tant que le coffre n'est pas lu, on n'affiche pas l'app (sinon requêtes sans token)
-  if (!pret) {
+  if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center bg-background">
         <Text className="text-muted">Chargement...</Text>
@@ -125,20 +126,47 @@ export default function App() {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Onglets" component={Onglets} />
-          <Stack.Screen name="Workout" component={WorkoutScreen} />
-          <Stack.Screen name="Data" component={DataScreen} />
-          <Stack.Screen name="Timer_serie" component={TimerScreen_Serie} />
-          <Stack.Screen name="Timer_exercise" component={TimerScreen_exercise} />
-          <Stack.Screen name="Summary" component={SummaryScreen} />
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {profile ? (
+          // CONNECTÉ : toute l'application est accessible
+          <>
+            <Stack.Screen name="Onglets" component={Onglets} />
+            <Stack.Screen name="Workout" component={WorkoutScreen} />
+            <Stack.Screen name="Data" component={DataScreen} />
+            <Stack.Screen name="Timer_serie" component={TimerScreen_Serie} />
+            <Stack.Screen name="Timer_exercise" component={TimerScreen_exercise} />
+            <Stack.Screen name="Summary" component={SummaryScreen} />
+          </>
+        ) : (
+          // DÉCONNECTÉ : uniquement l'écran de connexion
+          <Stack.Screen name="Login" component={LoginScreen} />
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
 
-        </Stack.Navigator>
-      </NavigationContainer>
-    </GestureHandlerRootView>
+export default function App() {
+  const [pret, setPret] = useState(false); // a-t-on fini de lire le coffre ?
+
+  // au démarrage : on relit le token du coffre et on le rebranche, UNE fois
+  useEffect(() => {
+    loadAuthToken().then(() => setPret(true));
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        {/* tant que le coffre n'est pas lu, on attend (sinon la requête profil part sans token) */}
+        {pret ? (
+          <Navigation />
+        ) : (
+          <View className="flex-1 items-center justify-center bg-background">
+            <Text className="text-muted">Chargement...</Text>
+          </View>
+        )}
+      </GestureHandlerRootView>
     </QueryClientProvider>
   );
 }
