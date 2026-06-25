@@ -49,8 +49,25 @@ export class CycleDaySchema extends BaseModel {
   declare workoutId: number | null
 }
 
+export class DayOverrideSchema extends BaseModel {
+  static $columns = ['createdAt', 'date', 'id', 'updatedAt', 'userId', 'workoutId'] as const
+  $columns = DayOverrideSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column.date()
+  declare date: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number | null
+  @column()
+  declare workoutId: number | null
+}
+
 export class ExerciseDefinitionSchema extends BaseModel {
-  static $columns = ['createdAt', 'icon', 'id', 'name', 'updatedAt', 'userId'] as const
+  static $columns = ['createdAt', 'icon', 'id', 'name', 'sectionId', 'updatedAt', 'userId'] as const
   $columns = ExerciseDefinitionSchema.$columns
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime | null
@@ -60,6 +77,8 @@ export class ExerciseDefinitionSchema extends BaseModel {
   declare id: number
   @column()
   declare name: string
+  @column()
+  declare sectionId: number | null
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
   @column()
@@ -133,6 +152,23 @@ export class ScheduleSchema extends BaseModel {
   declare userId: number | null
   @column()
   declare workoutId: number | null
+}
+
+export class SectionSchema extends BaseModel {
+  static $columns = ['createdAt', 'id', 'name', 'position', 'updatedAt', 'userId'] as const
+  $columns = SectionSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare name: string
+  @column()
+  declare position: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number | null
 }
 
 export class UserSchema extends BaseModel {

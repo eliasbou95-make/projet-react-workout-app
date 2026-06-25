@@ -4,6 +4,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '../api/client';
+import { PREFS, lirePref, versKg, fmtPoids } from '../preferences';
 
 const inputStyle = { borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' };
 
@@ -13,6 +14,12 @@ export default function DataScreen({ route, navigation }) {
 
     const [reps, setReps] = useState('');
     const [poids, setPoids] = useState('');
+
+    // unité de poids choisie (kg par défaut)
+    const { data: unite } = useQuery({
+        queryKey: ['weightUnit'],
+        queryFn: () => lirePref(PREFS.weightUnit, 'kg'),
+    });
 
     // dernière performance faite sur cet exo (toutes séances confondues)
     const { data: lastPerf } = useQuery({
@@ -30,7 +37,7 @@ export default function DataScreen({ route, navigation }) {
             exerciceId,
             index,
             reps: Number(reps),
-            weight: Number(poids),
+            weight: versKg(unite, poids),   // saisi dans l'unité choisie → stocké en kg
         });
     }
 
@@ -52,7 +59,7 @@ export default function DataScreen({ route, navigation }) {
                         {lastPerf ? (
                             <>
                                 <Text className="text-muted text-xs">Dernière performance</Text>
-                                <Text className="text-foreground font-semibold text-base">{lastPerf.reps} reps × {lastPerf.weight} kg · repos {lastPerf.restTime}s</Text>
+                                <Text className="text-foreground font-semibold text-base">{lastPerf.reps} reps × {fmtPoids(unite, lastPerf.weight)} · repos {lastPerf.restTime}s</Text>
                             </>
                         ) : (
                             <Text className="text-muted">Première fois sur cet exo 💪</Text>
@@ -64,7 +71,7 @@ export default function DataScreen({ route, navigation }) {
                 <Text className="text-muted text-sm mb-2">Répétitions</Text>
                 <TextInput value={reps} onChangeText={setReps} placeholder='ex. 8' placeholderTextColor='#8E8E93' keyboardType='numeric' style={inputStyle} className='bg-card text-foreground rounded-xl px-4 py-3 mb-4' />
 
-                <Text className="text-muted text-sm mb-2">Poids (kg)</Text>
+                <Text className="text-muted text-sm mb-2">Poids ({unite ?? 'kg'})</Text>
                 <TextInput value={poids} onChangeText={setPoids} placeholder='ex. 50' placeholderTextColor='#8E8E93' keyboardType='numeric' style={inputStyle} className='bg-card text-foreground rounded-xl px-4 py-3 mb-8' />
 
                 <Pressable onPress={lancerRepos}>

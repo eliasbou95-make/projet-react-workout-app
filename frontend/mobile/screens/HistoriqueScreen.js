@@ -6,6 +6,7 @@ import api from '../api/client';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import {LineChart} from 'react-native-gifted-charts' ;
+import { PREFS, lirePref, kgVers, fmtPoids } from '../preferences';
 
 export default function HistoriqueScreen() {
   const [sessionDetail, setSessionDetail] = useState(null); 
@@ -14,6 +15,12 @@ export default function HistoriqueScreen() {
   const [periode, setPeriode] = useState('mois');
   const [confirmSuppr, setConfirmSuppr] = useState(null);   // null | {type:'one', session} | {type:'all'}
   const queryClient = useQueryClient();
+
+  // unité de poids choisie (kg par défaut)
+  const { data: unite } = useQuery({
+    queryKey: ['weightUnit'],
+    queryFn: () => lirePref(PREFS.weightUnit, 'kg'),
+  });
 
   // supprimer UNE séance de l'historique
   const mutation_suppr_session = useMutation({
@@ -71,7 +78,7 @@ export default function HistoriqueScreen() {
       const label = periode === 'annee'
         ? d.toLocaleDateString('fr-FR', { month: 'short' })
         : d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
-      return { value: Number(p.weight), label };
+      return { value: kgVers(unite, p.weight), label };
     });
 
   // l'historique n'affiche QUE les séances finies (pas les skip)
@@ -89,7 +96,7 @@ export default function HistoriqueScreen() {
 
         {/* graphique de progression d'un exercice */}
         <View className="px-4 mb-2">
-          <Text className="text-muted text-xs uppercase tracking-widest mb-2 text-center">Progression (kg)</Text>
+          <Text className="text-muted text-xs uppercase tracking-widest mb-2 text-center">Progression ({unite ?? 'kg'})</Text>
 
           {/* menu déroulant : choisir l'exercice */}
           <Pressable
@@ -124,7 +131,7 @@ export default function HistoriqueScreen() {
 
           {/* le graphe, ou un message s'il n'y a pas (encore) de perf */}
           {dataGraphe.length > 0 ? (
-            <GraphiqueProgression data={dataGraphe} />
+            <GraphiqueProgression data={dataGraphe} unite={unite} />
           ) : (
             <View className="items-center justify-center py-10">
               <MaterialCommunityIcons name="chart-line" size={40} color="#8E8E93" />
@@ -199,6 +206,7 @@ export default function HistoriqueScreen() {
         <DetailSession
           session={sessionDetail}
           seance={workouts?.find((w) => w.id === sessionDetail.workoutId)}
+          unite={unite}
           onClose={() => setSessionDetail(null)}
         />
       )}
@@ -293,7 +301,7 @@ export default function HistoriqueScreen() {
 }
 
 // fenêtre de détail d'une séance terminée : pour chaque exercice, ses séries
-function DetailSession({ session, seance, onClose }) {
+function DetailSession({ session, seance, unite, onClose }) {
   const couleur = seance?.couleur ?? '#44D62C';
 
   // les exercices de la séance (pour avoir leurs noms)
@@ -353,7 +361,7 @@ function DetailSession({ session, seance, onClose }) {
                   </View>
                   {series.map((p, i) => (
                     <Text key={p.id} className="text-muted mb-1">
-                      <Text style={{ color: couleur, fontWeight: '700' }}>Série {i + 1}</Text>  —  {p.reps} reps × {p.weight} kg · repos {fmt(p.restTime)}
+                      <Text style={{ color: couleur, fontWeight: '700' }}>Série {i + 1}</Text>  —  {p.reps} reps × {fmtPoids(unite, p.weight)} · repos {fmt(p.restTime)}
                     </Text>
                   ))}
                 </View>
@@ -372,7 +380,7 @@ function DetailSession({ session, seance, onClose }) {
 }
 
 // graphique de progression : on donne juste les points, la lib gère axes/scaling
-function GraphiqueProgression({ data }) {
+function GraphiqueProgression({ data, unite }) {
   return (
     <LineChart
       data={data}
@@ -386,7 +394,7 @@ function GraphiqueProgression({ data }) {
       xAxisColor="rgba(255,255,255,0.2)"
       yAxisTextStyle={{ color: '#8E8E93', fontSize: 10 }}
       xAxisLabelTextStyle={{ color: '#8E8E93', fontSize: 10 }}
-      yAxisLabelSuffix=" kg"
+      yAxisLabelSuffix={` ${unite ?? 'kg'}`}
       noOfSections={4}           // nombre de graduations verticales
     />
   );

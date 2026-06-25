@@ -30,6 +30,10 @@ router
       .group(() => {
         router.get('profile', [controllers.Profile, 'show'])
         router.post('logout', [controllers.AccessTokens, 'destroy'])
+        router.delete('reset', [controllers.Profile, 'reset'])
+        router.patch('password', [controllers.Profile, 'updatePassword'])
+        router.patch('email', [controllers.Profile, 'updateEmail'])
+        router.delete('delete', [controllers.Profile, 'destroyAccount'])
       })
       .prefix('account')
       .as('profile')
@@ -87,6 +91,23 @@ router
           router.post('exercise-definitions', [controllers.ExerciseDefinitions, 'store'])
           router.get('exercise-definitions/:id/performances', [controllers.ExerciseDefinitions, 'progression'])
           router.delete('exercise-definitions/:id', [controllers.ExerciseDefinitions, 'destroy'])
+        })
+        .use(middleware.auth())
+
+// groupe sections (classeurs de rangement des exos)
+      router
+        .group(() => {
+          router.get('sections', [controllers.Sections, 'index'])
+          router.post('sections', [controllers.Sections, 'store'])
+          router.delete('sections/:id', [controllers.Sections, 'destroy'])
+        })
+        .use(middleware.auth())
+
+// groupe day_overrides (exceptions : changer la séance d'un jour précis)
+      router
+        .group(() => {
+          router.get('day-overrides', [controllers.DayOverrides, 'index'])
+          router.post('day-overrides', [controllers.DayOverrides, 'upsert'])
         })
         .use(middleware.auth())
 

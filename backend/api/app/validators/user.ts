@@ -24,3 +24,26 @@ export const loginValidator = vine.create({
   email: email(),
   password: vine.string(),
 })
+
+/**
+ * Changer le mot de passe (le mot de passe actuel est vérifié dans le contrôleur)
+ */
+export const changePasswordValidator = vine.create({
+  currentPassword: vine.string(),
+  newPassword: password(),
+})
+
+/**
+ * Changer l'email (le mot de passe est vérifié dans le contrôleur ; le nouvel email doit être libre)
+ */
+export const changeEmailValidator = vine.create({
+  password: vine.string(),
+  email: email().unique({ table: 'users', column: 'email' }),
+})
+
+/**
+ * Supprimer le compte (le mot de passe est vérifié dans le contrôleur)
+ */
+export const deleteAccountValidator = vine.create({
+  password: vine.string(),
+})

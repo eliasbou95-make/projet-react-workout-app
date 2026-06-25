@@ -8,6 +8,10 @@ export type ScannedRoutes = {
     'auth.access_tokens.store': { paramsTuple?: []; params?: {} }
     'profile.profile.show': { paramsTuple?: []; params?: {} }
     'profile.access_tokens.destroy': { paramsTuple?: []; params?: {} }
+    'profile.profile.reset': { paramsTuple?: []; params?: {} }
+    'profile.profile.update_password': { paramsTuple?: []; params?: {} }
+    'profile.profile.update_email': { paramsTuple?: []; params?: {} }
+    'profile.profile.destroy_account': { paramsTuple?: []; params?: {} }
     'workouts.index': { paramsTuple?: []; params?: {} }
     'workouts.store': { paramsTuple?: []; params?: {} }
     'workouts.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -32,6 +36,11 @@ export type ScannedRoutes = {
     'exercise_definitions.store': { paramsTuple?: []; params?: {} }
     'exercise_definitions.progression': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'exercise_definitions.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'sections.index': { paramsTuple?: []; params?: {} }
+    'sections.store': { paramsTuple?: []; params?: {} }
+    'sections.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'day_overrides.index': { paramsTuple?: []; params?: {} }
+    'day_overrides.upsert': { paramsTuple?: []; params?: {} }
     'workout_sessions.store': { paramsTuple: [ParamValue]; params: {'workoutId': ParamValue} }
     'workout_sessions.skip': { paramsTuple: [ParamValue]; params: {'workoutId': ParamValue} }
     'workout_sessions.complete': { paramsTuple: [ParamValue]; params: {'workoutId': ParamValue} }
@@ -55,6 +64,8 @@ export type ScannedRoutes = {
     'cycle_days.index': { paramsTuple?: []; params?: {} }
     'exercise_definitions.index': { paramsTuple?: []; params?: {} }
     'exercise_definitions.progression': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'sections.index': { paramsTuple?: []; params?: {} }
+    'day_overrides.index': { paramsTuple?: []; params?: {} }
     'workout_sessions.index': { paramsTuple?: []; params?: {} }
     'workout_sessions.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'performances.index': { paramsTuple: [ParamValue]; params: {'sessionId': ParamValue} }
@@ -70,6 +81,8 @@ export type ScannedRoutes = {
     'cycle_days.index': { paramsTuple?: []; params?: {} }
     'exercise_definitions.index': { paramsTuple?: []; params?: {} }
     'exercise_definitions.progression': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'sections.index': { paramsTuple?: []; params?: {} }
+    'day_overrides.index': { paramsTuple?: []; params?: {} }
     'workout_sessions.index': { paramsTuple?: []; params?: {} }
     'workout_sessions.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'performances.index': { paramsTuple: [ParamValue]; params: {'sessionId': ParamValue} }
@@ -84,6 +97,8 @@ export type ScannedRoutes = {
     'schedules.store': { paramsTuple?: []; params?: {} }
     'cycle_days.store': { paramsTuple?: []; params?: {} }
     'exercise_definitions.store': { paramsTuple?: []; params?: {} }
+    'sections.store': { paramsTuple?: []; params?: {} }
+    'day_overrides.upsert': { paramsTuple?: []; params?: {} }
     'workout_sessions.store': { paramsTuple: [ParamValue]; params: {'workoutId': ParamValue} }
     'workout_sessions.skip': { paramsTuple: [ParamValue]; params: {'workoutId': ParamValue} }
     'workout_sessions.complete': { paramsTuple: [ParamValue]; params: {'workoutId': ParamValue} }
@@ -91,15 +106,20 @@ export type ScannedRoutes = {
     'performances.store': { paramsTuple: [ParamValue]; params: {'sessionId': ParamValue} }
   }
   DELETE: {
+    'profile.profile.reset': { paramsTuple?: []; params?: {} }
+    'profile.profile.destroy_account': { paramsTuple?: []; params?: {} }
     'workouts.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'exercises.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'workoutId': ParamValue,'id': ParamValue} }
     'schedules.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'cycle_days.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'exercise_definitions.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'sections.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'workout_sessions.destroy_all': { paramsTuple?: []; params?: {} }
     'workout_sessions.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   PATCH: {
+    'profile.profile.update_password': { paramsTuple?: []; params?: {} }
+    'profile.profile.update_email': { paramsTuple?: []; params?: {} }
     'workouts.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'exercises.update': { paramsTuple: [ParamValue,ParamValue]; params: {'workoutId': ParamValue,'id': ParamValue} }
     'schedules.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

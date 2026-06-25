@@ -14,6 +14,10 @@ export default class WorkoutSessionsController {
             .firstOrFail()
         // jour du calendrier visé (optionnel) : envoyé par le front au démarrage
         const scheduledDate = request.input('scheduledDate')
+        // on relance ce jour : on enlève d'abord un éventuel marqueur (reset/skip) du même jour
+        if (scheduledDate) {
+            await WorkoutSession.query().where('userId', user.id).where('workoutId', workout.id).where('scheduledDate', scheduledDate).delete()
+        }
         const session = await WorkoutSession.create({
             userId: user.id,
             workoutId: workout.id,
@@ -30,7 +34,7 @@ export default class WorkoutSessionsController {
         const session = await WorkoutSession.query()
         .where('userId',user.id)
         .where((q) => {
-            q.whereNotNull('completedAt').orWhere('status', 'skipped')
+            q.whereNotNull('completedAt').orWhereIn('status', ['skipped', 'reset'])
         })
         return session
 
@@ -67,12 +71,19 @@ export default class WorkoutSessionsController {
         })
     }
 
-    // réinitialise la séance d'un jour : supprime toute session de ce jour
+    // réinitialise la séance d'un jour : on efface tout, puis on pose un marqueur 'reset'
+    // (= jour volontairement ignoré) pour que la croix automatique ne réapparaisse pas
     async reset ({auth, params, request} : HttpContext){
         const user = auth.getUserOrFail()
+        const workout = await Workout.query().where('userId', user.id).where('id', params.workoutId).firstOrFail()
         const scheduledDate = request.input('scheduledDate')
-        await WorkoutSession.query().where('userId', user.id).where('workoutId', params.workoutId).where('scheduledDate', scheduledDate).delete()
-        return { message: 'séance réinitialisée' }
+        await WorkoutSession.query().where('userId', user.id).where('workoutId', workout.id).where('scheduledDate', scheduledDate).delete()
+        return WorkoutSession.create({
+            userId: user.id,
+            workoutId: workout.id,
+            scheduledDate: scheduledDate ? DateTime.fromISO(scheduledDate) : null,
+            status: 'reset',
+        })
     }
 
     async show ({auth,params} : HttpContext ){

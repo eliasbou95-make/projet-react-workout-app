@@ -13,6 +13,10 @@ export interface ApiDefinition {
   profile: {
     profile: {
       show: typeof routes['profile.profile.show']
+      reset: typeof routes['profile.profile.reset']
+      updatePassword: typeof routes['profile.profile.update_password']
+      updateEmail: typeof routes['profile.profile.update_email']
+      destroyAccount: typeof routes['profile.profile.destroy_account']
     }
     accessTokens: {
       destroy: typeof routes['profile.access_tokens.destroy']
@@ -51,6 +55,15 @@ export interface ApiDefinition {
     store: typeof routes['exercise_definitions.store']
     progression: typeof routes['exercise_definitions.progression']
     destroy: typeof routes['exercise_definitions.destroy']
+  }
+  sections: {
+    index: typeof routes['sections.index']
+    store: typeof routes['sections.store']
+    destroy: typeof routes['sections.destroy']
+  }
+  dayOverrides: {
+    index: typeof routes['day_overrides.index']
+    upsert: typeof routes['day_overrides.upsert']
   }
   workoutSessions: {
     store: typeof routes['workout_sessions.store']

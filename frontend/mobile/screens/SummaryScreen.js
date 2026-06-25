@@ -3,11 +3,18 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../api/client';
+import { PREFS, lirePref, fmtPoids } from '../preferences';
 
 export default function SummaryScreen({ route, navigation }) {
   const { seance, sessionId } = route.params ?? {};
   const couleur = seance?.couleur ?? '#44D62C';
   const queryClient = useQueryClient();
+
+  // unité de poids choisie (kg par défaut)
+  const { data: unite } = useQuery({
+    queryKey: ['weightUnit'],
+    queryFn: () => lirePref(PREFS.weightUnit, 'kg'),
+  });
 
   // tous les exercices de la séance (pour avoir leurs noms)
   const { data: exercices } = useQuery({
@@ -57,7 +64,7 @@ export default function SummaryScreen({ route, navigation }) {
               </View>
               {series.map((s, i) => (
                 <Text key={s.id} className="text-muted mb-1">
-                  <Text style={{ color: couleur, fontWeight: '700' }}>Série {i + 1}</Text>  —  {s.reps} reps × {s.weight} kg · repos {fmt(s.restTime)}
+                  <Text style={{ color: couleur, fontWeight: '700' }}>Série {i + 1}</Text>  —  {s.reps} reps × {fmtPoids(unite, s.weight)} · repos {fmt(s.restTime)}
                 </Text>
               ))}
             </View>

@@ -13,8 +13,8 @@ export default class ExerciseDefinitionsController {
   // crée une nouvelle fiche d'exercice
   async store({ auth, request }: HttpContext) {
     const user = auth.getUserOrFail()
-    const { name, icon } = await request.validateUsing(createExerciseDefinitionValidator)
-    return ExerciseDefinition.create({ userId: user.id, name, icon: icon ?? null })
+    const { name, icon, sectionId } = await request.validateUsing(createExerciseDefinitionValidator)
+    return ExerciseDefinition.create({ userId: user.id, name, icon: icon ?? null, sectionId: sectionId ?? null })
   }
 
   // progression : toutes les perfs des exos qui partagent cette fiche (par date)

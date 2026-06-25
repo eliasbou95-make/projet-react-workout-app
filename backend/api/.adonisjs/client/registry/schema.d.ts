@@ -55,6 +55,54 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/access_tokens_controller').default['destroy']>>>
     }
   }
+  'profile.profile.reset': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/account/reset'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/profile_controller').default['reset']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/profile_controller').default['reset']>>>
+    }
+  }
+  'profile.profile.update_password': {
+    methods: ["PATCH"]
+    pattern: '/api/v1/account/password'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/user').changePasswordValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/user').changePasswordValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/profile_controller').default['updatePassword']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/profile_controller').default['updatePassword']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'profile.profile.update_email': {
+    methods: ["PATCH"]
+    pattern: '/api/v1/account/email'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/user').changeEmailValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/user').changeEmailValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/profile_controller').default['updateEmail']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/profile_controller').default['updateEmail']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'profile.profile.destroy_account': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/account/delete'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/user').deleteAccountValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/user').deleteAccountValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/profile_controller').default['destroyAccount']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/profile_controller').default['destroyAccount']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'workouts.index': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/workouts'
@@ -341,6 +389,66 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/exercise_definitions_controller').default['destroy']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/exercise_definitions_controller').default['destroy']>>>
+    }
+  }
+  'sections.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/sections'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/sections_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sections_controller').default['index']>>>
+    }
+  }
+  'sections.store': {
+    methods: ["POST"]
+    pattern: '/api/v1/sections'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/section').createSectionValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/section').createSectionValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/sections_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sections_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'sections.destroy': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/sections/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/sections_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/sections_controller').default['destroy']>>>
+    }
+  }
+  'day_overrides.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/day-overrides'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/day_overrides_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/day_overrides_controller').default['index']>>>
+    }
+  }
+  'day_overrides.upsert': {
+    methods: ["POST"]
+    pattern: '/api/v1/day-overrides'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/day_override').upsertDayOverrideValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/day_override').upsertDayOverrideValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/day_overrides_controller').default['upsert']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/day_overrides_controller').default['upsert']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
   'workout_sessions.store': {

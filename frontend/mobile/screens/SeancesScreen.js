@@ -8,7 +8,18 @@ import api from '../api/client';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-const ICONES = ['dumbbell', 'arm-flex', 'run', 'weight-lifter', 'bike', 'yoga', 'human-handsup'];
+const ICONES = [
+  // muscu / force
+  'dumbbell', 'weight-lifter', 'arm-flex', 'arm-flex-outline', 'weight', 'kettlebell', 'weight-kilogram',
+  // cardio / déplacement
+  'run', 'run-fast', 'walk', 'bike', 'swim', 'rowing', 'stairs-up', 'jump-rope',
+  // souplesse / arts martiaux
+  'yoga', 'meditation', 'karate', 'boxing-glove',
+  // sports
+  'soccer', 'basketball', 'tennis', 'volleyball', 'ski',
+  // corps / divers
+  'human-handsup', 'human-male', 'heart-pulse', 'fire',
+];
 
 export default function SeancesScreen() {
   const [ongletActif, setOngletActif] = useState('gestion');
@@ -25,9 +36,15 @@ export default function SeancesScreen() {
   const [modalExo, setModalExo] = useState(false);   // modal de création d'exercice
   const [nomExo, setNomExo] = useState("");
   const [iconeExo, setIconeExo] = useState(null);
+  const champNomRef = useRef(null);                          // pour redonner le focus au champ nom en chaînant
   const [selecteurExo, setSelecteurExo] = useState(false);   // modal pour piger un exo du catalogue
   const [dateCycleOuvert, setDateCycleOuvert] = useState(false);   // modal calendrier (date de début du cycle)
   const [repeatOuvert, setRepeatOuvert] = useState(false);   // modal nombre de répétitions du cycle
+  const [modalSection, setModalSection] = useState(false);   // modal de création d'une section
+  const [nomSection, setNomSection] = useState("");
+  const [sectionExo, setSectionExo] = useState(null);        // section choisie dans la modal exo (id ou null)
+  const [sectionsRepliees, setSectionsRepliees] = useState({}); // { [id]: true } = classeur fermé
+  const [seanceBloquee, setSeanceBloquee] = useState(null);   // séance qu'on tente de supprimer alors qu'elle est dans le cycle
   // position de la ligne qui glisse sous les onglets (0 = Gestion, 1 = Historique)
   const indicateur = useSharedValue(0);
   const styleIndicateur = useAnimatedStyle(() => ({
@@ -99,6 +116,28 @@ export default function SeancesScreen() {
     }
   })
 
+  // les classeurs (sections) de l'utilisateur
+  const { data: sections } = useQuery({
+    queryKey: ['sections'],
+    queryFn: () => api.get('sections').then((res) => res.data),
+  })
+
+  const mutation_ajout_section = useMutation({
+    mutationFn: (nouveau) => api.post('/sections', nouveau),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sections'] })
+    }
+  })
+
+  const mutation_suppr_section = useMutation({
+    mutationFn: (id) => api.delete(`/sections/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sections'] })
+      // les exos du classeur repassent "non classés" → on rafraîchit aussi le catalogue
+      queryClient.invalidateQueries({ queryKey: ['exerciseDefinitions'] })
+    }
+  })
+
   // profil : on en a besoin pour lire la date de début actuelle du cycle
   const { data: profile } = useQuery({
     queryKey: ['profile'],
@@ -151,6 +190,16 @@ export default function SeancesScreen() {
     });
   }
 
+  // suppression d'une séance : interdite si elle est programmée dans le cycle
+  function demanderSuppressionSeance(id) {
+    const programmee = cycle?.some((j) => j.workoutId === id);
+    if (programmee) {
+      setSeanceBloquee(data?.find((s) => s.id === id) ?? null);
+    } else {
+      mutation_suppresion.mutate(id);
+    }
+  }
+
   function modifierExercice(index, champ, valeur) {
     const copie = [...exercices];
     copie[index] = {...copie[index], [champ] : valeur}
@@ -188,13 +237,90 @@ export default function SeancesScreen() {
     setModalVisible(false)
   }
 
-  // crée une fiche d'exercice puis ferme le modal (la liste se rafraîchit via l'invalidation)
-  function creerExo() {
-    if (!nomExo.trim()) return
-    mutation_ajout_exo.mutate({ name: nomExo, icon: iconeExo })
+  // enregistre la fiche d'exercice et remet le formulaire à blanc ; renvoie false si le nom est vide
+  function enregistrerExo() {
+    if (!nomExo.trim()) return false
+    mutation_ajout_exo.mutate({ name: nomExo, icon: iconeExo, sectionId: sectionExo })
     setNomExo('')
     setIconeExo(null)
-    setModalExo(false)
+    return true
+  }
+
+  // crée un classeur puis ferme la modal
+  function creerSection() {
+    if (!nomSection.trim()) return
+    mutation_ajout_section.mutate({ name: nomSection })
+    setNomSection('')
+    setModalSection(false)
+  }
+
+  // ouvre/ferme un classeur (id de section, ou '__none__' pour les non classés)
+  // on préfixe la clé ('sel-...') pour que le sélecteur et le catalogue soient indépendants
+  function basculerSection(id) {
+    setSectionsRepliees((prev) => ({ ...prev, [id]: !prev[id] }))
+  }
+
+  // une ligne d'exercice dans le sélecteur (modale "Ajouter un exercice" d'une séance)
+  function ligneExoSel(exo) {
+    return (
+      <Pressable
+        key={exo.id}
+        onPress={() => choisirExo(exo)}
+        className="flex-row items-center py-3 px-3 mb-2 rounded-xl border border-white/5"
+        style={{ backgroundColor: 'rgba(255,255,255,0.04)' }}
+      >
+        <View
+          className="w-10 h-10 rounded-full items-center justify-center mr-3"
+          style={{ backgroundColor: 'rgba(68,214,44,0.13)', borderWidth: 1, borderColor: 'rgba(68,214,44,0.5)' }}
+        >
+          <MaterialCommunityIcons name={exo.icon ?? 'dumbbell'} size={22} color="#44D62C" />
+        </View>
+        <Text className="text-foreground flex-1 font-semibold">{exo.name}</Text>
+        <MaterialCommunityIcons name="plus" size={22} color="#44D62C" />
+      </Pressable>
+    )
+  }
+
+  // une carte d'exercice du catalogue (réutilisée dans chaque classeur)
+  function carteExo(exo) {
+    return (
+      <View key={exo.id} className="relative items-center w-24">
+        <LinearGradient
+          colors={['#26262A', '#161618']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          className="w-24 h-28 rounded-2xl items-center justify-center border border-white/10"
+          style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5)' }}
+        >
+          <MaterialCommunityIcons name={exo.icon ?? 'dumbbell'} size={34} color="#44D62C" />
+          <Text className="text-foreground text-sm font-semibold mt-2 text-center px-1" numberOfLines={2}>
+            {exo.name}
+          </Text>
+        </LinearGradient>
+        <Pressable
+          onPress={() => mutation_suppr_exo.mutate(exo.id)}
+          hitSlop={10}
+          className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full items-center justify-center"
+          style={{
+            backgroundColor: 'rgba(18,18,20,0.92)',
+            borderWidth: 1,
+            borderColor: 'rgba(255,255,255,0.14)',
+          }}
+        >
+          <MaterialCommunityIcons name="close" size={11} color="#8E8E93" />
+        </Pressable>
+      </View>
+    )
+  }
+
+  // créer puis fermer le modal
+  function creerExo() {
+    if (enregistrerExo()) setModalExo(false)
+  }
+
+  // créer puis enchaîner : on garde le modal ouvert et on redonne le focus au champ nom
+  function creerExoEtSuite() {
+    if (enregistrerExo()) champNomRef.current?.focus()
   }
 
   // le clone suit le doigt (coordonnées absolues de l'écran), décalé de 32 pour être centré
@@ -249,23 +375,49 @@ export default function SeancesScreen() {
         </View>
       </View>
 
-      <Pressable
-        onPress={() => (ongletActif === 'gestion' ? setModalVisible(true) : setModalExo(true))}
-        className="self-center mb-7"
-      >
-        <LinearGradient
-          colors={['#1E1E20', '#0D0D0E']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0, y: 1 }}
-          className="flex-row items-center gap-2 rounded-full py-3.5 px-8 border border-accent/60"
-          style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.4)' }}
-        >
-          <MaterialCommunityIcons name="plus" size={22} color="#44D62C" />
-          <Text className="text-accent font-bold text-base">
-            {ongletActif === 'gestion' ? 'Nouvelle séance' : 'Nouvel exercice'}
-          </Text>
-        </LinearGradient>
-      </Pressable>
+      {ongletActif === 'gestion' ? (
+        <Pressable onPress={() => setModalVisible(true)} className="self-center mb-7">
+          <LinearGradient
+            colors={['#1E1E20', '#0D0D0E']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            className="flex-row items-center gap-2 rounded-2xl py-3.5 px-8 border border-accent/60"
+            style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.4)' }}
+          >
+            <MaterialCommunityIcons name="plus" size={22} color="#44D62C" />
+            <Text className="text-accent font-bold text-base">Nouvelle séance</Text>
+          </LinearGradient>
+        </Pressable>
+      ) : (
+        <View className="flex-row items-center justify-center gap-3 mb-7">
+          {/* bouton principal : nouvel exercice */}
+          <Pressable onPress={() => { setSectionExo(null); setModalExo(true); }}>
+            <LinearGradient
+              colors={['#1E1E20', '#0D0D0E']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              className="flex-row items-center gap-2 rounded-2xl py-3.5 px-8 border border-accent/60"
+              style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.4)' }}
+            >
+              <MaterialCommunityIcons name="plus" size={22} color="#44D62C" />
+              <Text className="text-accent font-bold text-base">Nouvel exercice</Text>
+            </LinearGradient>
+          </Pressable>
+          {/* petit bouton secondaire : nouvelle section */}
+          <Pressable onPress={() => setModalSection(true)}>
+            <LinearGradient
+              colors={['#1E1E20', '#0D0D0E']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              className="flex-row items-center gap-1.5 rounded-2xl py-2.5 px-4 border border-white/15"
+              style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5)' }}
+            >
+              <MaterialCommunityIcons name="folder-plus" size={18} color="#8E8E93" />
+              <Text className="text-muted font-semibold text-sm">Section</Text>
+            </LinearGradient>
+          </Pressable>
+        </View>
+      )}
 
       {/* popup ajouter séance */}
       <Modal visible={modalVisible} animationType="slide">
@@ -296,28 +448,7 @@ export default function SeancesScreen() {
 
             {/* Icône */}
             <Text className="text-muted text-xs uppercase tracking-widest mb-2">Icône</Text>
-            <View className="flex-row flex-wrap gap-3 mb-5">
-              {ICONES.map((nomIcone) => {
-                const actif = icone === nomIcone;
-                return (
-                  <Pressable key={nomIcone} onPress={() => setIcone(nomIcone)}>
-                    <LinearGradient
-                      colors={['#26262A', '#161618']}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 0, y: 1 }}
-                      className={`w-14 h-14 rounded-2xl items-center justify-center border ${actif ? 'border-accent/70' : 'border-white/10'}`}
-                      style={actif ? { boxShadow: '0px 0px 5px rgba(68,214,44,0.45)' } : null}
-                    >
-                      <MaterialCommunityIcons
-                        name={nomIcone}
-                        size={26}
-                        color={actif ? '#44D62C' : '#8E8E93'}
-                      />
-                    </LinearGradient>
-                  </Pressable>
-                );
-              })}
-            </View>
+            <GrilleIcones valeur={icone} onChoisir={setIcone} />
 
             {/* Exercices */}
             <Text className="text-muted text-xs uppercase tracking-widest mb-2">Exercices</Text>
@@ -436,6 +567,7 @@ export default function SeancesScreen() {
             {/* Nom */}
             <Text className="text-muted text-xs uppercase tracking-widest mb-2">Nom</Text>
             <TextInput
+              ref={champNomRef}
               value={nomExo}
               onChangeText={setNomExo}
               placeholder="ex : Squat, Développé couché..."
@@ -445,27 +577,141 @@ export default function SeancesScreen() {
 
             {/* Icône */}
             <Text className="text-muted text-xs uppercase tracking-widest mb-2">Icône</Text>
-            <View className="flex-row flex-wrap gap-3 mb-6">
-              {ICONES.map((nomIcone) => {
-                const actif = iconeExo === nomIcone;
+            <GrilleIcones valeur={iconeExo} onChoisir={setIconeExo} />
+
+            {/* Section (classeur de rangement) */}
+            <Text className="text-muted text-xs uppercase tracking-widest mb-2">Section</Text>
+            <View className="flex-row flex-wrap gap-2 mb-6">
+              {/* aucune section */}
+              <Pressable onPress={() => setSectionExo(null)}>
+                <View
+                  className={`rounded-full px-4 py-2 border ${sectionExo == null ? 'border-accent/70' : 'border-white/10'}`}
+                  style={sectionExo == null ? { backgroundColor: 'rgba(68,214,44,0.13)' } : null}
+                >
+                  <Text className={sectionExo == null ? 'text-accent font-semibold' : 'text-muted'}>Aucune</Text>
+                </View>
+              </Pressable>
+              {/* une pastille par classeur existant */}
+              {sections?.map((s) => {
+                const actif = sectionExo === s.id;
                 return (
-                  <Pressable key={nomIcone} onPress={() => setIconeExo(nomIcone)}>
-                    <LinearGradient
-                      colors={['#26262A', '#161618']}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 0, y: 1 }}
-                      className={`w-14 h-14 rounded-2xl items-center justify-center border ${actif ? 'border-accent/70' : 'border-white/10'}`}
-                      style={actif ? { boxShadow: '0px 0px 5px rgba(68,214,44,0.45)' } : null}
+                  <Pressable key={s.id} onPress={() => setSectionExo(s.id)}>
+                    <View
+                      className={`rounded-full px-4 py-2 border ${actif ? 'border-accent/70' : 'border-white/10'}`}
+                      style={actif ? { backgroundColor: 'rgba(68,214,44,0.13)' } : null}
                     >
-                      <MaterialCommunityIcons name={nomIcone} size={26} color={actif ? '#44D62C' : '#8E8E93'} />
-                    </LinearGradient>
+                      <Text className={actif ? 'text-accent font-semibold' : 'text-muted'}>{s.name}</Text>
+                    </View>
                   </Pressable>
                 );
               })}
             </View>
 
-            {/* Boutons */}
-            <Pressable onPress={creerExo} className="mb-3">
+            {/* Boutons : "Créer" (ferme) + "+" (crée et enchaîne un autre) */}
+            <View className="flex-row gap-3 mb-2">
+              <Pressable onPress={creerExo} className="flex-1">
+                <LinearGradient
+                  colors={['#1E1E20', '#0D0D0E']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 0, y: 1 }}
+                  className="rounded-xl py-4 items-center border border-accent/60"
+                  style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.4)' }}
+                >
+                  <Text className="text-accent font-bold text-base">Créer l'exercice</Text>
+                </LinearGradient>
+              </Pressable>
+              <Pressable onPress={creerExoEtSuite}>
+                <LinearGradient
+                  colors={['#1E1E20', '#0D0D0E']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 0, y: 1 }}
+                  className="rounded-xl py-4 px-5 items-center justify-center border border-accent/60"
+                  style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.4)' }}
+                >
+                  <MaterialCommunityIcons name="plus" size={24} color="#44D62C" />
+                </LinearGradient>
+              </Pressable>
+            </View>
+            <Text className="text-muted text-xs text-center mb-3">« + » : crée et enchaîne un autre exercice</Text>
+            <Pressable onPress={() => setModalExo(false)} className="py-1 items-center">
+              <Text className="text-muted">Terminé</Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* modale : suppression bloquée (séance encore dans le cycle) */}
+      <Modal visible={!!seanceBloquee} transparent animationType="fade">
+        <Pressable
+          onPress={() => setSeanceBloquee(null)}
+          className="flex-1 items-center justify-center px-8"
+          style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}
+        >
+          <Pressable
+            onPress={(e) => e.stopPropagation?.()}
+            className="bg-card rounded-3xl px-7 py-8 items-center w-full border border-white/10"
+            style={{ boxShadow: '0px 8px 28px rgba(0,0,0,0.6)' }}
+          >
+            <View
+              className="w-16 h-16 rounded-full items-center justify-center mb-4"
+              style={{ backgroundColor: 'rgba(251,191,36,0.12)', borderWidth: 1, borderColor: 'rgba(251,191,36,0.6)' }}
+            >
+              <MaterialCommunityIcons name="calendar-alert" size={32} color="#FBBF24" />
+            </View>
+            <Text className="text-foreground text-xl font-bold text-center mb-2">Séance programmée</Text>
+            <Text className="text-muted text-center mb-7">
+              « {seanceBloquee?.name} » est utilisée dans ton cycle. Retire-la d'abord du cycle (colonne de droite) pour pouvoir la supprimer.
+            </Text>
+            <Pressable onPress={() => setSeanceBloquee(null)} className="w-full">
+              <LinearGradient
+                colors={['#1E1E20', '#0D0D0E']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                className="rounded-2xl py-4 items-center border border-accent/60"
+                style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.4)' }}
+              >
+                <Text className="text-accent font-bold text-base">Compris</Text>
+              </LinearGradient>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* modale : créer un nouveau classeur (section) */}
+      <Modal visible={modalSection} transparent animationType="fade">
+        <Pressable
+          onPress={() => setModalSection(false)}
+          className="flex-1 items-center justify-center px-8"
+          style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}
+        >
+          <Pressable
+            onPress={(e) => e.stopPropagation?.()}
+            className="bg-card rounded-3xl px-7 py-8 w-full border border-white/10"
+            style={{ boxShadow: '0px 8px 28px rgba(0,0,0,0.6)' }}
+          >
+            <View className="items-center mb-5">
+              <LinearGradient
+                colors={['#26262A', '#161618']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                className="w-16 h-16 rounded-2xl items-center justify-center mb-3 border border-accent/70"
+                style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.45)' }}
+              >
+                <MaterialCommunityIcons name="folder-plus" size={30} color="#44D62C" />
+              </LinearGradient>
+              <Text className="text-foreground text-2xl font-bold">Nouvelle section</Text>
+            </View>
+
+            <Text className="text-muted text-xs uppercase tracking-widest mb-2">Nom</Text>
+            <TextInput
+              value={nomSection}
+              onChangeText={setNomSection}
+              placeholder="ex : Biceps, Dos, Pectoraux..."
+              placeholderTextColor="#8E8E93"
+              className="text-foreground bg-card rounded-xl px-4 py-3 mb-6 border border-white/5"
+            />
+
+            <Pressable onPress={creerSection}>
               <LinearGradient
                 colors={['#1E1E20', '#0D0D0E']}
                 start={{ x: 0, y: 0 }}
@@ -473,10 +719,10 @@ export default function SeancesScreen() {
                 className="rounded-xl py-4 items-center border border-accent/60"
                 style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.4)' }}
               >
-                <Text className="text-accent font-bold text-base">Créer l'exercice</Text>
+                <Text className="text-accent font-bold text-base">Créer la section</Text>
               </LinearGradient>
             </Pressable>
-            <Pressable onPress={() => setModalExo(false)} className="py-1 items-center">
+            <Pressable onPress={() => setModalSection(false)} className="py-2 mt-2 items-center">
               <Text className="text-muted">Annuler</Text>
             </Pressable>
           </Pressable>
@@ -499,23 +745,47 @@ export default function SeancesScreen() {
             <Text className="text-muted text-center text-sm mb-5">Dans ton catalogue d'exercices</Text>
 
             <ScrollView showsVerticalScrollIndicator={false}>
-              {exos?.map((exo) => (
-                <Pressable
-                  key={exo.id}
-                  onPress={() => choisirExo(exo)}
-                  className="flex-row items-center py-3 px-3 mb-2 rounded-xl border border-white/5"
-                  style={{ backgroundColor: 'rgba(255,255,255,0.04)' }}
-                >
-                  <View
-                    className="w-10 h-10 rounded-full items-center justify-center mr-3"
-                    style={{ backgroundColor: 'rgba(68,214,44,0.13)', borderWidth: 1, borderColor: 'rgba(68,214,44,0.5)' }}
-                  >
-                    <MaterialCommunityIcons name={exo.icon ?? 'dumbbell'} size={22} color="#44D62C" />
+              {/* un classeur par section */}
+              {sections?.map((s) => {
+                const exosSection = exos?.filter((e) => e.sectionId === s.id) ?? [];
+                if (exosSection.length === 0) return null;   // dans le sélecteur on cache les classeurs vides
+                const ferme = sectionsRepliees['sel-' + s.id];
+                return (
+                  <View key={s.id} className="mb-2">
+                    <Pressable
+                      onPress={() => basculerSection('sel-' + s.id)}
+                      className="flex-row items-center gap-2 py-2 px-1 mb-1"
+                    >
+                      <MaterialCommunityIcons name={ferme ? 'chevron-right' : 'chevron-down'} size={20} color="#44D62C" />
+                      <MaterialCommunityIcons name="folder" size={18} color="#44D62C" />
+                      <Text className="text-foreground font-semibold flex-1">{s.name}</Text>
+                      <Text className="text-muted text-xs">{exosSection.length}</Text>
+                    </Pressable>
+                    {!ferme && exosSection.map((exo) => ligneExoSel(exo))}
                   </View>
-                  <Text className="text-foreground flex-1 font-semibold">{exo.name}</Text>
-                  <MaterialCommunityIcons name="plus" size={22} color="#44D62C" />
-                </Pressable>
-              ))}
+                );
+              })}
+
+              {/* exos non classés */}
+              {(() => {
+                const nonClasses = exos?.filter((e) => !e.sectionId) ?? [];
+                if (nonClasses.length === 0) return null;
+                const ferme = sectionsRepliees['sel-none'];
+                return (
+                  <View className="mb-2">
+                    <Pressable
+                      onPress={() => basculerSection('sel-none')}
+                      className="flex-row items-center gap-2 py-2 px-1 mb-1"
+                    >
+                      <MaterialCommunityIcons name={ferme ? 'chevron-right' : 'chevron-down'} size={20} color="#8E8E93" />
+                      <MaterialCommunityIcons name="folder-outline" size={18} color="#8E8E93" />
+                      <Text className="text-foreground font-semibold flex-1">Non classés</Text>
+                      <Text className="text-muted text-xs">{nonClasses.length}</Text>
+                    </Pressable>
+                    {!ferme && nonClasses.map((exo) => ligneExoSel(exo))}
+                  </View>
+                );
+              })()}
 
               {/* catalogue vide */}
               {(!exos || exos.length === 0) && (
@@ -653,10 +923,11 @@ export default function SeancesScreen() {
 
           <View className="flex-1 flex-row">
 
-          <View className="flex-1">
-            <Text className="text-muted text-xs uppercase tracking-widest mb-4 text-center">Mes séances</Text>
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ alignItems: 'center', paddingTop: 8, paddingHorizontal: 8, paddingBottom: 120 }}>
-            <View className="flex-row flex-wrap justify-start gap-4" style={{ maxWidth: 272 }}>
+          <View className="flex-1 pr-1">
+            <Text className="text-muted text-xs uppercase tracking-widest mb-1 ml-1">Mes séances</Text>
+            <Text className="text-muted mb-3 ml-1" style={{ fontSize: 11 }}>Glisse-les vers un jour →</Text>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: 6, paddingRight: 6, paddingBottom: 120 }}>
+            <View className="flex-row flex-wrap gap-3">
               {data?.map((seance) => (
                 <PastilleDraggable
                   key={seance.id}
@@ -665,7 +936,7 @@ export default function SeancesScreen() {
                   dragY={dragY}
                   onDragStart={demarrerDrag}
                   onDrop={deposer}
-                  supprimerJour={(id) => mutation_suppresion.mutate(id)}
+                  supprimerJour={demanderSuppressionSeance}
                   ouvrirExercices={() => setWorkoutOuvert(seance)}
                 />
               ))}
@@ -673,7 +944,7 @@ export default function SeancesScreen() {
               {/* pastille "jour de repos" : virtuelle (id null), toujours présente.
                   Lâchée sur le cycle → deposer(..., null) → workoutId null = repos */}
               <PastilleDraggable
-                seance={{ id: null, name: 'jour_de_repos', icon: 'sleep', couleur: '#22d3ee' }}
+                seance={{ id: null, name: 'Repos', icon: 'sleep', couleur: '#22d3ee' }}
                 dragX={dragX}
                 dragY={dragY}
                 onDragStart={demarrerDrag}
@@ -683,149 +954,161 @@ export default function SeancesScreen() {
             </ScrollView>
           </View>
 
-          {/* le cycle : une case par jour, + une case vide en bas pour ajouter */}
+          {/* le cycle : une case par jour, en colonne, + une case vide en bas pour ajouter */}
           <ScrollView
-            style={{ width: 160 }}
+            style={{ width: 116, marginRight: -16 }}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 120, paddingTop: 6, paddingRight: 10, alignItems: 'flex-end' }}
+            contentContainerStyle={{ paddingBottom: 120, paddingTop: 12, paddingRight: 10, alignItems: 'flex-end' }}
           >
-            <Text className="text-muted text-xs uppercase tracking-widest mb-4 mr-1">Mon cycle</Text>
+            <Text className="text-muted text-xs uppercase tracking-widest mb-3 mr-1">Cycle</Text>
             {cycle?.map((jour) => {
               const seance = jour.workoutId ? data?.find((s) => s.id === jour.workoutId) : null;
               const couleur = seance ? (seance.couleur ?? '#44D62C') : '#22d3ee'; // cyan = repos
               return (
-                <View key={jour.id} className="flex-row items-center justify-end gap-3 mb-3">
-                  <Text className="text-muted text-xs">#{jour.position + 1}</Text>
-                  <View className="relative">
-                    <LinearGradient
-                      colors={['#26262A', '#161618']}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 0, y: 1 }}
-                      className="w-14 h-14 rounded-2xl items-center justify-center border"
-                      style={{ borderColor: `${couleur}99`, boxShadow: `0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px ${couleur}66` }}
-                    >
-                      {seance ? (
-                        seance.icon ? (
-                          <MaterialCommunityIcons name={seance.icon} size={30} color={couleur} />
-                        ) : (
-                          <View className="w-8 h-8 rounded-full" style={{ backgroundColor: couleur }} />
-                        )
+                <View key={jour.id} className="relative mb-2.5">
+                  <View
+                    className="w-16 h-16 rounded-2xl items-center justify-center border"
+                    style={{ borderColor: `${couleur}99`, backgroundColor: 'rgba(255,255,255,0.03)' }}
+                  >
+                    {seance ? (
+                      seance.icon ? (
+                        <MaterialCommunityIcons name={seance.icon} size={28} color={couleur} />
                       ) : (
-                        <MaterialCommunityIcons name="sleep" size={26} color={couleur} />
-                      )}
-                    </LinearGradient>
-                    <Pressable
-                      onPress={() => mutation_suppr_cycle.mutate(jour.id)}
-                      className="absolute -top-2 -right-2 w-6 h-6 rounded-full items-center justify-center"
-                      style={{
-                        backgroundColor: '#1A1012',
-                        borderWidth: 1,
-                        borderColor: 'rgba(239,68,68,0.7)',
-                        boxShadow: '0px 0px 6px rgba(239,68,68,0.5)',
-                      }}
-                    >
-                      <MaterialCommunityIcons name="close" size={13} color="#ef4444" />
-                    </Pressable>
+                        <View className="w-7 h-7 rounded-full" style={{ backgroundColor: couleur }} />
+                      )
+                    ) : (
+                      <MaterialCommunityIcons name="sleep" size={24} color={couleur} />
+                    )}
                   </View>
+                  <Pressable
+                    onPress={() => mutation_suppr_cycle.mutate(jour.id)}
+                    hitSlop={10}
+                    className="absolute -top-1 -right-1 w-5 h-5 rounded-full items-center justify-center"
+                    style={{ backgroundColor: 'rgba(18,18,20,0.92)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.14)' }}
+                  >
+                    <MaterialCommunityIcons name="close" size={11} color="#8E8E93" />
+                  </Pressable>
                 </View>
               );
             })}
 
-            {/* repos de fin de cycle : tuile active, au-dessus du + vert, supprimable.
-                visible seulement s'il y a au moins un jour dans le cycle ET qu'il est activé */}
-            {cycle?.length > 0 && profile?.cycleEndRest && (
-              <View className="flex-row items-center justify-end gap-3 mb-3">
-                <Text className="text-muted text-xs">repos de fin de cycle</Text>
-                <View className="relative">
-                  <LinearGradient
-                    colors={['#26262A', '#161618']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 0, y: 1 }}
-                    className="w-14 h-14 rounded-2xl items-center justify-center border"
-                    style={{ borderColor: '#22d3ee99', boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px #22d3ee66' }}
-                  >
-                    <MaterialCommunityIcons name="sleep" size={26} color="#22d3ee" />
-                  </LinearGradient>
-                  <Pressable
-                    onPress={() => mutation_endrest_cycle.mutate(false)}
-                    className="absolute -top-2 -right-2 w-6 h-6 rounded-full items-center justify-center"
-                    style={{
-                      backgroundColor: '#1A1012',
-                      borderWidth: 1,
-                      borderColor: 'rgba(239,68,68,0.7)',
-                      boxShadow: '0px 0px 6px rgba(239,68,68,0.5)',
-                    }}
-                  >
-                    <MaterialCommunityIcons name="close" size={13} color="#ef4444" />
-                  </Pressable>
-                </View>
-              </View>
-            )}
-
-            {/* la case vide = zone de drop pour ajouter un jour à la fin.
-                key = longueur du cycle → la case se remonte à chaque ajout/suppression
-                et se re-mesure (sinon sa position enregistrée reste périmée) */}
-            <CaseVide innerRef={caseVideRef} />
-
-            {/* fantôme bleu : réactiver le repos de fin, placé SOUS le + vert */}
-            {cycle?.length > 0 && !profile?.cycleEndRest && (
-              <Pressable
-                onPress={() => mutation_endrest_cycle.mutate(true)}
-                className="flex-row items-center justify-end gap-3 mt-3"
-                style={{ width: 150 }}
-              >
-                <Text className="text-muted text-xs text-right" style={{ flex: 1 }}>clique pour crée un repos de fin de cycle</Text>
+            {/* Repos de fin ACTIF → case dorée finale, et PLUS de case d'ajout derrière.
+                Sinon → case d'ajout (+), puis l'option de clore le cycle par un repos de fin. */}
+            {profile?.cycleEndRest && cycle?.length > 0 ? (
+              <View className="relative mb-2.5">
                 <View
-                  className="w-14 h-14 rounded-2xl items-center justify-center"
-                  style={{ borderWidth: 1, borderStyle: 'dashed', borderColor: 'rgba(34,211,238,0.5)' }}
+                  className="w-16 h-16 rounded-2xl items-center justify-center border"
+                  style={{ borderColor: '#FBBF24', backgroundColor: 'rgba(251,191,36,0.1)', boxShadow: '0px 0px 8px rgba(251,191,36,0.35)' }}
                 >
-                  <MaterialCommunityIcons name="plus" size={20} color="#22d3ee" />
+                  <MaterialCommunityIcons name="beach" size={26} color="#FBBF24" />
                 </View>
-              </Pressable>
+                <Pressable
+                  onPress={() => mutation_endrest_cycle.mutate(false)}
+                  hitSlop={10}
+                  className="absolute -top-1 -right-1 w-5 h-5 rounded-full items-center justify-center"
+                  style={{ backgroundColor: 'rgba(18,18,20,0.92)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.14)' }}
+                >
+                  <MaterialCommunityIcons name="close" size={11} color="#8E8E93" />
+                </Pressable>
+              </View>
+            ) : (
+              <>
+                {/* la case vide = zone de drop pour ajouter un jour à la fin */}
+                <CaseVide innerRef={caseVideRef} />
+
+                {/* option : clore le cycle par un repos de fin (seulement si le cycle a des jours) */}
+                {cycle?.length > 0 && (
+                  <Pressable onPress={() => mutation_endrest_cycle.mutate(true)} className="items-center mt-1" style={{ width: 64, alignSelf: 'flex-end' }}>
+                    <View
+                      className="items-center justify-center w-16 h-16 rounded-2xl"
+                      style={{ borderWidth: 1, borderStyle: 'dashed', borderColor: 'rgba(251,191,36,0.5)' }}
+                    >
+                      <MaterialCommunityIcons name="beach" size={26} color="#FBBF24" />
+                    </View>
+                    <Text className="font-semibold text-center mt-1.5" style={{ color: '#FBBF24', fontSize: 9 }}>
+                      Ajouter un repos de fin de cycle
+                    </Text>
+                  </Pressable>
+                )}
+              </>
             )}
           </ScrollView>
           </View>
         </View>
       ) : (
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ alignItems: 'center', paddingTop: 8, paddingHorizontal: 8, paddingBottom: 120 }}>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: 8, paddingHorizontal: 12, paddingBottom: 120 }}>
           <Text className="text-muted text-xs uppercase tracking-widest mb-4 text-center">Mes exercices</Text>
 
-          <View className="flex-row flex-wrap justify-center gap-4">
-            {exos?.map((exo) => (
-              <View key={exo.id} className="relative items-center w-24">
-                <LinearGradient
-                  colors={['#26262A', '#161618']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 0, y: 1 }}
-                  className="w-24 h-28 rounded-2xl items-center justify-center border border-white/10"
-                  style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5)' }}
-                >
-                  <MaterialCommunityIcons name={exo.icon ?? 'dumbbell'} size={34} color="#44D62C" />
-                  <Text className="text-foreground text-sm font-semibold mt-2 text-center px-1" numberOfLines={2}>
-                    {exo.name}
-                  </Text>
-                </LinearGradient>
+          {/* un classeur par section */}
+          {sections?.map((s) => {
+            const exosSection = exos?.filter((e) => e.sectionId === s.id) ?? [];
+            const ferme = sectionsRepliees[s.id];
+            return (
+              <View key={s.id} className="mb-4">
+                {/* en-tête du classeur : flèche + dossier + nom + nombre + croix */}
                 <Pressable
-                  onPress={() => mutation_suppr_exo.mutate(exo.id)}
-                  className="absolute -top-2 -right-2 w-6 h-6 rounded-full items-center justify-center"
-                  style={{
-                    backgroundColor: '#1A1012',
-                    borderWidth: 1,
-                    borderColor: 'rgba(239,68,68,0.7)',
-                    boxShadow: '0px 0px 6px rgba(239,68,68,0.5)',
-                  }}
+                  onPress={() => basculerSection(s.id)}
+                  className="flex-row items-center gap-2 py-3 px-3 rounded-2xl border border-white/10"
+                  style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}
                 >
-                  <MaterialCommunityIcons name="close" size={13} color="#ef4444" />
+                  <MaterialCommunityIcons name={ferme ? 'chevron-right' : 'chevron-down'} size={22} color="#44D62C" />
+                  <MaterialCommunityIcons name="folder" size={20} color="#44D62C" />
+                  <Text className="text-foreground font-semibold flex-1">{s.name}</Text>
+                  <Text className="text-muted text-xs mr-1">{exosSection.length}</Text>
+                  <Pressable
+                    onPress={() => mutation_suppr_section.mutate(s.id)}
+                    hitSlop={8}
+                    className="w-6 h-6 rounded-full items-center justify-center"
+                    style={{ backgroundColor: 'rgba(18,18,20,0.92)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.14)' }}
+                  >
+                    <MaterialCommunityIcons name="close" size={12} color="#8E8E93" />
+                  </Pressable>
                 </Pressable>
-              </View>
-            ))}
-          </View>
 
-          {/* message si aucun exercice */}
-          {(!exos || exos.length === 0) && (
+                {/* contenu du classeur : les exos (cachés quand replié) */}
+                {!ferme && (
+                  <View className="flex-row flex-wrap gap-4 mt-3 px-1">
+                    {exosSection.map((exo) => carteExo(exo))}
+                    {exosSection.length === 0 && (
+                      <Text className="text-muted text-sm px-2 py-3">Classeur vide</Text>
+                    )}
+                  </View>
+                )}
+              </View>
+            );
+          })}
+
+          {/* classeur des exos non classés (n'apparaît que s'il y en a) */}
+          {(() => {
+            const nonClasses = exos?.filter((e) => !e.sectionId) ?? [];
+            if (nonClasses.length === 0) return null;
+            const ferme = sectionsRepliees['__none__'];
+            return (
+              <View className="mb-4">
+                <Pressable
+                  onPress={() => basculerSection('__none__')}
+                  className="flex-row items-center gap-2 py-3 px-3 rounded-2xl border border-white/10"
+                  style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}
+                >
+                  <MaterialCommunityIcons name={ferme ? 'chevron-right' : 'chevron-down'} size={22} color="#8E8E93" />
+                  <MaterialCommunityIcons name="folder-outline" size={20} color="#8E8E93" />
+                  <Text className="text-foreground font-semibold flex-1">Non classés</Text>
+                  <Text className="text-muted text-xs">{nonClasses.length}</Text>
+                </Pressable>
+                {!ferme && (
+                  <View className="flex-row flex-wrap gap-4 mt-3 px-1">
+                    {nonClasses.map((exo) => carteExo(exo))}
+                  </View>
+                )}
+              </View>
+            );
+          })()}
+
+          {/* message si aucun exercice ET aucune section */}
+          {(!exos || exos.length === 0) && (!sections || sections.length === 0) && (
             <View className="items-center justify-center mt-20">
               <MaterialCommunityIcons name="arm-flex" size={48} color="#8E8E93" />
-              <Text className="text-muted mt-3">Aucun exercice. Crée ton premier !</Text>
+              <Text className="text-muted mt-3 text-center">Aucun exercice. Crée ton premier !</Text>
             </View>
           )}
         </ScrollView>
@@ -857,6 +1140,37 @@ export default function SeancesScreen() {
   );
 }
 
+// grille d'icônes scrollable : on n'en voit que ~2 rangées, le reste se fond dans l'ombre
+function GrilleIcones({ valeur, onChoisir }) {
+  return (
+    <ScrollView
+      style={{ maxHeight: 164, marginBottom: 20 }}
+      showsVerticalScrollIndicator={false}
+      nestedScrollEnabled
+      contentContainerStyle={{ paddingBottom: 6 }}
+    >
+      <View className="flex-row flex-wrap gap-3">
+        {ICONES.map((nomIcone) => {
+          const actif = valeur === nomIcone;
+          return (
+            <Pressable key={nomIcone} onPress={() => onChoisir(nomIcone)}>
+              <LinearGradient
+                colors={['#26262A', '#161618']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                className={`w-14 h-14 rounded-2xl items-center justify-center border ${actif ? 'border-accent/70' : 'border-white/10'}`}
+                style={actif ? { boxShadow: '0px 0px 5px rgba(68,214,44,0.45)' } : null}
+              >
+                <MaterialCommunityIcons name={nomIcone} size={26} color={actif ? '#44D62C' : '#8E8E93'} />
+              </LinearGradient>
+            </Pressable>
+          );
+        })}
+      </View>
+    </ScrollView>
+  );
+}
+
 function PastilleDraggable({ seance, dragX, dragY, onDragStart, onDrop, supprimerJour, ouvrirExercices }) {
 
   const couleur = seance.couleur ?? '#44D62C';
@@ -879,39 +1193,39 @@ function PastilleDraggable({ seance, dragX, dragY, onDragStart, onDrop, supprime
 
   return (
     <GestureDetector gesture={pan}>
-      <View className="items-center w-20">
+      <View className="items-center w-16">
         <View className="relative">
           <Pressable onPress={ouvrirExercices}>
             <LinearGradient
               colors={['#26262A', '#161618']}
               start={{ x: 0, y: 0 }}
               end={{ x: 0, y: 1 }}
-              className="w-16 h-16 rounded-2xl items-center justify-center border"
+              className="w-12 h-12 rounded-2xl items-center justify-center border"
               style={{ borderColor: `${couleur}99`, boxShadow: `0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px ${couleur}66` }}
             >
               {seance.icon ? (
-                <MaterialCommunityIcons name={seance.icon} size={30} color={couleur} />
+                <MaterialCommunityIcons name={seance.icon} size={24} color={couleur} />
               ) : (
-                <View className="w-8 h-8 rounded-full" style={{ backgroundColor: couleur }} />
+                <View className="w-6 h-6 rounded-full" style={{ backgroundColor: couleur }} />
               )}
             </LinearGradient>
           </Pressable>
           {seance.id != null && (
             <Pressable
               onPress={() => supprimerJour(seance.id)}
-              className="absolute -top-2 -right-2 w-6 h-6 rounded-full items-center justify-center"
+              hitSlop={8}
+              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full items-center justify-center"
               style={{
-                backgroundColor: '#1A1012',
+                backgroundColor: 'rgba(18,18,20,0.92)',
                 borderWidth: 1,
-                borderColor: 'rgba(239,68,68,0.7)',
-                boxShadow: '0px 0px 6px rgba(239,68,68,0.5)',
+                borderColor: 'rgba(255,255,255,0.14)',
               }}
             >
-              <MaterialCommunityIcons name="close" size={13} color="#ef4444" />
+              <MaterialCommunityIcons name="close" size={11} color="#8E8E93" />
             </Pressable>
           )}
         </View>
-        <Text className="text-muted text-xs mt-2 text-center" numberOfLines={1}>{seance.name}</Text>
+        <Text className="text-muted mt-1.5 text-center" style={{ fontSize: 10 }} numberOfLines={1}>{seance.name}</Text>
       </View>
     </GestureDetector>
   );
@@ -921,20 +1235,16 @@ function PastilleDraggable({ seance, dragX, dragY, onDragStart, onDrop, supprime
 // innerRef = ref donnée par le parent, qui mesure cette case au moment du lâcher
 function CaseVide({ innerRef }) {
   return (
-    <View className="flex-row items-center justify-end gap-3 mb-3">
-      <Text className="text-muted text-xs">+</Text>
-      <View
-        ref={innerRef}
-        className="w-14 h-14 rounded-2xl items-center justify-center"
-        style={{
-          borderWidth: 1,
-          borderStyle: 'dashed',
-          borderColor: 'rgba(68,214,44,0.7)',
-          boxShadow: '0px 0px 5px rgba(68,214,44,0.4)',
-        }}
-      >
-        <MaterialCommunityIcons name="plus" size={24} color="#44D62C" />
-      </View>
+    <View
+      ref={innerRef}
+      className="items-center justify-center w-16 h-16 rounded-2xl mb-2.5"
+      style={{
+        borderWidth: 1,
+        borderStyle: 'dashed',
+        borderColor: 'rgba(68,214,44,0.6)',
+      }}
+    >
+      <MaterialCommunityIcons name="plus" size={24} color="#44D62C" />
     </View>
   );
 }

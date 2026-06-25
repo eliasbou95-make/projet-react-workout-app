@@ -30,6 +30,30 @@ const routes = {
     tokens: [{"old":"/api/v1/account/logout","type":0,"val":"api","end":""},{"old":"/api/v1/account/logout","type":0,"val":"v1","end":""},{"old":"/api/v1/account/logout","type":0,"val":"account","end":""},{"old":"/api/v1/account/logout","type":0,"val":"logout","end":""}],
     types: placeholder as Registry['profile.access_tokens.destroy']['types'],
   },
+  'profile.profile.reset': {
+    methods: ["DELETE"],
+    pattern: '/api/v1/account/reset',
+    tokens: [{"old":"/api/v1/account/reset","type":0,"val":"api","end":""},{"old":"/api/v1/account/reset","type":0,"val":"v1","end":""},{"old":"/api/v1/account/reset","type":0,"val":"account","end":""},{"old":"/api/v1/account/reset","type":0,"val":"reset","end":""}],
+    types: placeholder as Registry['profile.profile.reset']['types'],
+  },
+  'profile.profile.update_password': {
+    methods: ["PATCH"],
+    pattern: '/api/v1/account/password',
+    tokens: [{"old":"/api/v1/account/password","type":0,"val":"api","end":""},{"old":"/api/v1/account/password","type":0,"val":"v1","end":""},{"old":"/api/v1/account/password","type":0,"val":"account","end":""},{"old":"/api/v1/account/password","type":0,"val":"password","end":""}],
+    types: placeholder as Registry['profile.profile.update_password']['types'],
+  },
+  'profile.profile.update_email': {
+    methods: ["PATCH"],
+    pattern: '/api/v1/account/email',
+    tokens: [{"old":"/api/v1/account/email","type":0,"val":"api","end":""},{"old":"/api/v1/account/email","type":0,"val":"v1","end":""},{"old":"/api/v1/account/email","type":0,"val":"account","end":""},{"old":"/api/v1/account/email","type":0,"val":"email","end":""}],
+    types: placeholder as Registry['profile.profile.update_email']['types'],
+  },
+  'profile.profile.destroy_account': {
+    methods: ["DELETE"],
+    pattern: '/api/v1/account/delete',
+    tokens: [{"old":"/api/v1/account/delete","type":0,"val":"api","end":""},{"old":"/api/v1/account/delete","type":0,"val":"v1","end":""},{"old":"/api/v1/account/delete","type":0,"val":"account","end":""},{"old":"/api/v1/account/delete","type":0,"val":"delete","end":""}],
+    types: placeholder as Registry['profile.profile.destroy_account']['types'],
+  },
   'workouts.index': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/workouts',
@@ -173,6 +197,36 @@ const routes = {
     pattern: '/api/v1/exercise-definitions/:id',
     tokens: [{"old":"/api/v1/exercise-definitions/:id","type":0,"val":"api","end":""},{"old":"/api/v1/exercise-definitions/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/exercise-definitions/:id","type":0,"val":"exercise-definitions","end":""},{"old":"/api/v1/exercise-definitions/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['exercise_definitions.destroy']['types'],
+  },
+  'sections.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/sections',
+    tokens: [{"old":"/api/v1/sections","type":0,"val":"api","end":""},{"old":"/api/v1/sections","type":0,"val":"v1","end":""},{"old":"/api/v1/sections","type":0,"val":"sections","end":""}],
+    types: placeholder as Registry['sections.index']['types'],
+  },
+  'sections.store': {
+    methods: ["POST"],
+    pattern: '/api/v1/sections',
+    tokens: [{"old":"/api/v1/sections","type":0,"val":"api","end":""},{"old":"/api/v1/sections","type":0,"val":"v1","end":""},{"old":"/api/v1/sections","type":0,"val":"sections","end":""}],
+    types: placeholder as Registry['sections.store']['types'],
+  },
+  'sections.destroy': {
+    methods: ["DELETE"],
+    pattern: '/api/v1/sections/:id',
+    tokens: [{"old":"/api/v1/sections/:id","type":0,"val":"api","end":""},{"old":"/api/v1/sections/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/sections/:id","type":0,"val":"sections","end":""},{"old":"/api/v1/sections/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['sections.destroy']['types'],
+  },
+  'day_overrides.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/day-overrides',
+    tokens: [{"old":"/api/v1/day-overrides","type":0,"val":"api","end":""},{"old":"/api/v1/day-overrides","type":0,"val":"v1","end":""},{"old":"/api/v1/day-overrides","type":0,"val":"day-overrides","end":""}],
+    types: placeholder as Registry['day_overrides.index']['types'],
+  },
+  'day_overrides.upsert': {
+    methods: ["POST"],
+    pattern: '/api/v1/day-overrides',
+    tokens: [{"old":"/api/v1/day-overrides","type":0,"val":"api","end":""},{"old":"/api/v1/day-overrides","type":0,"val":"v1","end":""},{"old":"/api/v1/day-overrides","type":0,"val":"day-overrides","end":""}],
+    types: placeholder as Registry['day_overrides.upsert']['types'],
   },
   'workout_sessions.store': {
     methods: ["POST"],

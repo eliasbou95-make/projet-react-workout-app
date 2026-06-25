@@ -4,11 +4,18 @@ import { useQuery } from '@tanstack/react-query';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useState } from 'react';
 import api from '../api/client';
+import { PREFS, lirePref, fmtPoids } from '../preferences';
 
 export default function WorkoutScreen({ route, navigation }) {
   const { seance, sessionId, index = 0 } = route.params ?? {};
   const couleur = seance?.couleur ?? '#44D62C';
   const [quitter, setQuitter] = useState(false);
+
+  // unité de poids choisie (kg par défaut)
+  const { data: unite } = useQuery({
+    queryKey: ['weightUnit'],
+    queryFn: () => lirePref(PREFS.weightUnit, 'kg'),
+  });
 
   const { data: exercices, isLoading } = useQuery({
     queryKey: ['exercises', seance?.id],
@@ -76,7 +83,7 @@ export default function WorkoutScreen({ route, navigation }) {
         <View className="flex-row items-center mt-4 px-4 py-2 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
           <MaterialCommunityIcons name="history" size={16} color={couleur} />
           <Text className="text-muted ml-2">
-            {lastPerf ? `Dernière : ${lastPerf.reps} reps × ${lastPerf.weight} kg · repos ${lastPerf.restTime}s` : 'Première fois sur cet exo 💪'}
+            {lastPerf ? `Dernière : ${lastPerf.reps} reps × ${fmtPoids(unite, lastPerf.weight)} · repos ${lastPerf.restTime}s` : 'Première fois sur cet exo 💪'}
           </Text>
         </View>
 
