@@ -1,5 +1,6 @@
 import ExerciseDefinition from "#models/exercise_definition";
 import Performance from "#models/performance";
+import Section from "#models/section";
 import { createExerciseDefinitionValidator } from "#validators/exercise_definition";
 import { HttpContext } from "@adonisjs/core/http";
 
@@ -14,6 +15,10 @@ export default class ExerciseDefinitionsController {
   async store({ auth, request }: HttpContext) {
     const user = auth.getUserOrFail()
     const { name, icon, sectionId } = await request.validateUsing(createExerciseDefinitionValidator)
+    // sécurité : si une section est fournie, elle doit appartenir à l'utilisateur
+    if (sectionId) {
+      await Section.query().where('userId', user.id).where('id', sectionId).firstOrFail()
+    }
     return ExerciseDefinition.create({ userId: user.id, name, icon: icon ?? null, sectionId: sectionId ?? null })
   }
 

@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '../api/client';
 import { PREFS, lirePref, versKg, fmtPoids } from '../preferences';
+import Feedback from '../components/Feedback';
 
 const inputStyle = { borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' };
 
@@ -14,6 +15,7 @@ export default function DataScreen({ route, navigation }) {
 
     const [reps, setReps] = useState('');
     const [poids, setPoids] = useState('');
+    const [msg, setMsg] = useState(null);
 
     // unité de poids choisie (kg par défaut)
     const { data: unite } = useQuery({
@@ -31,12 +33,22 @@ export default function DataScreen({ route, navigation }) {
     // on N'enregistre PAS ici : on passe reps+poids au timer, qui enregistrera
     // avec le vrai temps de repos au moment où l'utilisateur clique « Continuer »
     function lancerRepos() {
+        setMsg(null);
+        const nbReps = Number(reps);
+        const nbPoids = Number(poids);
+        // on refuse les valeurs vides ou non numériques (sinon on enregistre du NaN en base)
+        if (!reps || !Number.isFinite(nbReps) || nbReps <= 0) {
+            return setMsg({ type: 'err', text: 'Entre un nombre de répétitions valide.' });
+        }
+        if (poids === '' || !Number.isFinite(nbPoids) || nbPoids < 0) {
+            return setMsg({ type: 'err', text: 'Entre un poids valide (0 autorisé pour le poids du corps).' });
+        }
         navigation.navigate('Timer_serie', {
             seance,
             sessionId,
             exerciceId,
             index,
-            reps: Number(reps),
+            reps: nbReps,
             weight: versKg(unite, poids),   // saisi dans l'unité choisie → stocké en kg
         });
     }
@@ -72,7 +84,9 @@ export default function DataScreen({ route, navigation }) {
                 <TextInput value={reps} onChangeText={setReps} placeholder='ex. 8' placeholderTextColor='#8E8E93' keyboardType='numeric' style={inputStyle} className='bg-card text-foreground rounded-xl px-4 py-3 mb-4' />
 
                 <Text className="text-muted text-sm mb-2">Poids ({unite ?? 'kg'})</Text>
-                <TextInput value={poids} onChangeText={setPoids} placeholder='ex. 50' placeholderTextColor='#8E8E93' keyboardType='numeric' style={inputStyle} className='bg-card text-foreground rounded-xl px-4 py-3 mb-8' />
+                <TextInput value={poids} onChangeText={setPoids} placeholder='ex. 50' placeholderTextColor='#8E8E93' keyboardType='numeric' style={inputStyle} className='bg-card text-foreground rounded-xl px-4 py-3 mb-4' />
+
+                <Feedback msg={msg} />
 
                 <Pressable onPress={lancerRepos}>
                     <LinearGradient

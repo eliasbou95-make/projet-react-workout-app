@@ -7,6 +7,7 @@ import { useMutation ,useQuery, useQueryClient} from '@tanstack/react-query';
 import api from '../api/client';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import Feedback, { messageErreur } from '../components/Feedback';
 
 const ICONES = [
   // muscu / force
@@ -45,6 +46,10 @@ export default function SeancesScreen() {
   const [sectionExo, setSectionExo] = useState(null);        // section choisie dans la modal exo (id ou null)
   const [sectionsRepliees, setSectionsRepliees] = useState({}); // { [id]: true } = classeur fermé
   const [seanceBloquee, setSeanceBloquee] = useState(null);   // séance qu'on tente de supprimer alors qu'elle est dans le cycle
+  const [msgSeance, setMsgSeance] = useState(null);          // feedback de la modal "Nouvelle séance"
+  const [msgExo, setMsgExo] = useState(null);                // feedback de la modal "Nouvel exercice"
+  const [msgSection, setMsgSection] = useState(null);        // feedback de la modal "Nouvelle section"
+  const [creationSeance, setCreationSeance] = useState(false); // création de séance en cours (anti double-clic)
   // position de la ligne qui glisse sous les onglets (0 = Gestion, 1 = Historique)
   const indicateur = useSharedValue(0);
   const styleIndicateur = useAnimatedStyle(() => ({
@@ -106,7 +111,8 @@ export default function SeancesScreen() {
     mutationFn: (nouveau) => api.post('/exercise-definitions', nouveau),
     onSuccess: () => {
       queryClient.invalidateQueries({queryKey: ['exerciseDefinitions']})
-    }
+    },
+    onError: (err) => setMsgExo({ type: 'err', text: messageErreur(err, "Impossible de créer l'exercice.") })
   })
 
   const mutation_suppr_exo = useMutation({
@@ -126,7 +132,8 @@ export default function SeancesScreen() {
     mutationFn: (nouveau) => api.post('/sections', nouveau),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sections'] })
-    }
+    },
+    onError: (err) => setMsgSection({ type: 'err', text: messageErreur(err, 'Impossible de créer la section.') })
   })
 
   const mutation_suppr_section = useMutation({
@@ -218,29 +225,52 @@ export default function SeancesScreen() {
   }
 
   async function ajouterSeance() {
-
-    const res = await mutation_ajout.mutateAsync({ name: nom, icon: icone })
-    const workout = res.data
-
-    for (const exo of exercices) {
-      if (!exo.name.trim()) continue
-      await api.post(`/workouts/${workout.id}/exercises`, {
-        name: exo.name,
-        sets: exo.sets ? Number(exo.sets) : undefined,
-        definitionId: exo.definitionId,
-      })
+    setMsgSeance(null)
+    // garde : on refuse une séance sans nom (sinon le backend renvoie une erreur)
+    if (!nom.trim()) {
+      return setMsgSeance({ type: 'err', text: 'Donne un nom à ta séance.' })
     }
+    // garde : il faut aussi avoir choisi une icône
+    if (!icone) {
+      return setMsgSeance({ type: 'err', text: 'Choisis une icône pour ta séance.' })
+    }
+    setCreationSeance(true)
+    try {
+      const res = await mutation_ajout.mutateAsync({ name: nom.trim(), icon: icone })
+      const workout = res.data
 
-    setNom('')
-    setIcone(null)
-    setExercices([])
-    setModalVisible(false)
+      for (const exo of exercices) {
+        if (!exo.name.trim()) continue
+        await api.post(`/workouts/${workout.id}/exercises`, {
+          name: exo.name,
+          sets: exo.sets ? Number(exo.sets) : undefined,
+          definitionId: exo.definitionId,
+        })
+      }
+
+      setNom('')
+      setIcone(null)
+      setExercices([])
+      setModalVisible(false)
+    } catch (err) {
+      setMsgSeance({ type: 'err', text: messageErreur(err, 'Impossible de créer la séance.') })
+    } finally {
+      setCreationSeance(false)
+    }
   }
 
   // enregistre la fiche d'exercice et remet le formulaire à blanc ; renvoie false si le nom est vide
   function enregistrerExo() {
-    if (!nomExo.trim()) return false
-    mutation_ajout_exo.mutate({ name: nomExo, icon: iconeExo, sectionId: sectionExo })
+    setMsgExo(null)
+    if (!nomExo.trim()) {
+      setMsgExo({ type: 'err', text: "Donne un nom à l'exercice." })
+      return false
+    }
+    if (!iconeExo) {
+      setMsgExo({ type: 'err', text: "Choisis une icône pour l'exercice." })
+      return false
+    }
+    mutation_ajout_exo.mutate({ name: nomExo.trim(), icon: iconeExo, sectionId: sectionExo })
     setNomExo('')
     setIconeExo(null)
     return true
@@ -248,8 +278,11 @@ export default function SeancesScreen() {
 
   // crée un classeur puis ferme la modal
   function creerSection() {
-    if (!nomSection.trim()) return
-    mutation_ajout_section.mutate({ name: nomSection })
+    setMsgSection(null)
+    if (!nomSection.trim()) {
+      return setMsgSection({ type: 'err', text: 'Donne un nom à la section.' })
+    }
+    mutation_ajout_section.mutate({ name: nomSection.trim() })
     setNomSection('')
     setModalSection(false)
   }
@@ -376,7 +409,7 @@ export default function SeancesScreen() {
       </View>
 
       {ongletActif === 'gestion' ? (
-        <Pressable onPress={() => setModalVisible(true)} className="self-center mb-7">
+        <Pressable onPress={() => { setMsgSeance(null); setModalVisible(true); }} className="self-center mb-7">
           <LinearGradient
             colors={['#1E1E20', '#0D0D0E']}
             start={{ x: 0, y: 0 }}
@@ -391,7 +424,7 @@ export default function SeancesScreen() {
       ) : (
         <View className="flex-row items-center justify-center gap-3 mb-7">
           {/* bouton principal : nouvel exercice */}
-          <Pressable onPress={() => { setSectionExo(null); setModalExo(true); }}>
+          <Pressable onPress={() => { setMsgExo(null); setSectionExo(null); setModalExo(true); }}>
             <LinearGradient
               colors={['#1E1E20', '#0D0D0E']}
               start={{ x: 0, y: 0 }}
@@ -404,7 +437,7 @@ export default function SeancesScreen() {
             </LinearGradient>
           </Pressable>
           {/* petit bouton secondaire : nouvelle section */}
-          <Pressable onPress={() => setModalSection(true)}>
+          <Pressable onPress={() => { setMsgSection(null); setModalSection(true); }}>
             <LinearGradient
               colors={['#1E1E20', '#0D0D0E']}
               start={{ x: 0, y: 0 }}
@@ -479,15 +512,16 @@ export default function SeancesScreen() {
             </Pressable>
 
             {/* Boutons */}
-            <Pressable onPress={ajouterSeance} className="mb-3">
+            <Feedback msg={msgSeance} />
+            <Pressable onPress={ajouterSeance} disabled={creationSeance} className="mb-3">
               <LinearGradient
                 colors={['#1E1E20', '#0D0D0E']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 0, y: 1 }}
                 className="rounded-xl py-4 items-center border border-accent/60"
-                style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.4)' }}
+                style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.4)', opacity: creationSeance ? 0.6 : 1 }}
               >
-                <Text className="text-accent font-bold text-base">Créer la séance</Text>
+                <Text className="text-accent font-bold text-base">{creationSeance ? 'Création…' : 'Créer la séance'}</Text>
               </LinearGradient>
             </Pressable>
             <Pressable onPress={() => setModalVisible(false)} className="py-2 items-center">
@@ -608,6 +642,7 @@ export default function SeancesScreen() {
             </View>
 
             {/* Boutons : "Créer" (ferme) + "+" (crée et enchaîne un autre) */}
+            <Feedback msg={msgExo} />
             <View className="flex-row gap-3 mb-2">
               <Pressable onPress={creerExo} className="flex-1">
                 <LinearGradient
@@ -711,6 +746,7 @@ export default function SeancesScreen() {
               className="text-foreground bg-card rounded-xl px-4 py-3 mb-6 border border-white/5"
             />
 
+            <Feedback msg={msgSection} />
             <Pressable onPress={creerSection}>
               <LinearGradient
                 colors={['#1E1E20', '#0D0D0E']}
@@ -956,7 +992,7 @@ export default function SeancesScreen() {
 
           {/* le cycle : une case par jour, en colonne, + une case vide en bas pour ajouter */}
           <ScrollView
-            style={{ width: 116, marginRight: -16 }}
+            style={{ width: 116, marginRight: -15 }}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 120, paddingTop: 12, paddingRight: 10, alignItems: 'flex-end' }}
           >

@@ -16,6 +16,11 @@ export default class ExercisesController {
             .firstOrFail()
              let { name, sets, reps, weight, restTime, notes, definitionId } = await request.validateUsing(createExerciseValidator)
 
+        // sécurité : si une fiche est fournie par le client, elle doit appartenir à l'utilisateur
+        if (definitionId) {
+            await ExerciseDefinition.query().where('userId', user.id).where('id', definitionId).firstOrFail()
+        }
+
         // auto-homologation : si aucune fiche fournie, on la retrouve par nom (même utilisateur)
         if (!definitionId) {
             const def = await ExerciseDefinition.query()

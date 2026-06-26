@@ -2,13 +2,16 @@ import { View, Text, Pressable, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import api from '../api/client';
 import { PREFS, lirePref, fmtPoids } from '../preferences';
+import Feedback, { messageErreur } from '../components/Feedback';
 
 export default function SummaryScreen({ route, navigation }) {
   const { seance, sessionId } = route.params ?? {};
   const couleur = seance?.couleur ?? '#44D62C';
   const queryClient = useQueryClient();
+  const [msg, setMsg] = useState(null);
 
   // unité de poids choisie (kg par défaut)
   const { data: unite } = useQuery({
@@ -37,6 +40,7 @@ export default function SummaryScreen({ route, navigation }) {
       queryClient.invalidateQueries({ queryKey: ['sessions'] });
       navigation.navigate('Onglets', { screen: 'Accueil' });
     },
+    onError: (err) => setMsg({ type: 'err', text: messageErreur(err, 'Impossible de terminer la séance.') }),
   });
 
   // formate des secondes en mm:ss
@@ -71,16 +75,17 @@ export default function SummaryScreen({ route, navigation }) {
           );
         })}
 
-        <Pressable className="mt-4" onPress={() => mutation_finir.mutate()}>
+        <Feedback msg={msg} />
+        <Pressable className="mt-4" onPress={() => { setMsg(null); mutation_finir.mutate(); }} disabled={mutation_finir.isPending}>
           <LinearGradient
             colors={['#1E1E20', '#0D0D0E']}
             start={{ x: 0, y: 0 }}
             end={{ x: 0, y: 1 }}
             className="rounded-2xl py-4 flex-row items-center justify-center border"
-            style={{ borderColor: `${couleur}99`, boxShadow: `0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px ${couleur}66` }}
+            style={{ borderColor: `${couleur}99`, boxShadow: `0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px ${couleur}66`, opacity: mutation_finir.isPending ? 0.6 : 1 }}
           >
             <MaterialCommunityIcons name="flag-checkered" size={22} color={couleur} />
-            <Text className="font-bold text-base ml-2" style={{ color: couleur }}>Finir la séance</Text>
+            <Text className="font-bold text-base ml-2" style={{ color: couleur }}>{mutation_finir.isPending ? 'Validation…' : 'Finir la séance'}</Text>
           </LinearGradient>
         </Pressable>
       </ScrollView>

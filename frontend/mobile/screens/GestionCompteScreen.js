@@ -4,25 +4,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import api, { setAuthToken } from '../api/client';
+import Feedback, { messageErreur } from '../components/Feedback';
 
 const inputStyle = { borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' };
-
-// message d'erreur renvoyé par le backend (ou un défaut)
-function messageErreur(err, defaut) {
-  return err?.response?.data?.message ?? err?.response?.data?.errors?.[0]?.message ?? defaut;
-}
-
-// ligne de feedback (succès vert / erreur rouge)
-function Feedback({ msg }) {
-  if (!msg) return null;
-  const couleur = msg.type === 'ok' ? '#44D62C' : '#ef4444';
-  return (
-    <View className="flex-row items-center gap-2 mb-3">
-      <MaterialCommunityIcons name={msg.type === 'ok' ? 'check-circle' : 'alert-circle'} size={16} color={couleur} />
-      <Text style={{ color: couleur, fontSize: 13, flex: 1 }}>{msg.text}</Text>
-    </View>
-  );
-}
 
 // une entrée du menu : icône + titre + sous-titre + chevron
 function LigneMenu({ icone, couleur, titre, sousTitre, onPress }) {

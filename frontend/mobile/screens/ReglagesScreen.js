@@ -5,6 +5,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../api/client';
 import { PREFS, lirePref, ecrirePref } from '../preferences';
+import Feedback, { messageErreur } from '../components/Feedback';
 
 // une carte de réglage : icône + titre + sous-titre + un contrôle à droite (children)
 function Carte({ icone, couleur = '#44D62C', titre, sousTitre, children, onPress }) {
@@ -65,6 +66,7 @@ export default function ReglagesScreen({ navigation }) {
 
   // réinitialisation totale (irréversible)
   const [confirmReset, setConfirmReset] = useState(false);
+  const [msgReset, setMsgReset] = useState(null);
   const mut_reset = useMutation({
     mutationFn: () => api.delete('account/reset'),
     onSuccess: () => {
@@ -72,6 +74,7 @@ export default function ReglagesScreen({ navigation }) {
         .forEach((k) => queryClient.invalidateQueries({ queryKey: [k] }));
       setConfirmReset(false);
     },
+    onError: (err) => setMsgReset({ type: 'err', text: messageErreur(err, 'Échec de la réinitialisation.') }),
   });
 
   return (
@@ -169,7 +172,7 @@ export default function ReglagesScreen({ navigation }) {
         {/* Données : zone danger */}
         <Text className="text-muted text-xs uppercase tracking-widest mb-2 mt-4 ml-1">Données</Text>
         <Pressable
-          onPress={() => setConfirmReset(true)}
+          onPress={() => { setMsgReset(null); setConfirmReset(true); }}
           className="flex-row items-center justify-center gap-2 rounded-2xl py-4 mt-1"
           style={{ borderWidth: 1, borderColor: 'rgba(239,68,68,0.6)', backgroundColor: 'rgba(239,68,68,0.1)' }}
         >
@@ -206,7 +209,8 @@ export default function ReglagesScreen({ navigation }) {
               Comme si <Text style={{ color: '#ef4444', fontWeight: '700' }}>RIEN N'AVAIT JAMAIS EXISTÉ</Text>.
             </Text>
 
-            <Pressable onPress={() => mut_reset.mutate()} disabled={mut_reset.isPending} className="w-full mb-2">
+            <View className="w-full"><Feedback msg={msgReset} /></View>
+            <Pressable onPress={() => { setMsgReset(null); mut_reset.mutate(); }} disabled={mut_reset.isPending} className="w-full mb-2">
               <View
                 className="rounded-2xl py-4 items-center"
                 style={{ backgroundColor: '#ef4444', opacity: mut_reset.isPending ? 0.6 : 1 }}

@@ -4,6 +4,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import api, { setAuthToken } from '../api/client';
 import { useState } from 'react';
+import Feedback, { messageErreur } from '../components/Feedback';
 
 // style commun des champs de saisie (carte sombre + liseré discret)
 const inputStyle = { borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' };
@@ -16,6 +17,8 @@ export default function LoginScreen() {
   const [emailInscription, setEmailInscription] = useState('');
   const [mdpInscription, setMdpInscription] = useState('');
   const [mdpConfirm, setMdpConfirm] = useState('');
+  const [msgLogin, setMsgLogin] = useState(null);     // feedback de l'écran de connexion
+  const [msgSignup, setMsgSignup] = useState(null);   // feedback de l'écran d'inscription
 
   const mutation_login = useMutation({
     mutationFn: (credentials) => api.post('auth/login', credentials),
@@ -25,6 +28,12 @@ export default function LoginScreen() {
       // on rafraîchit le profil → App voit qu'on est connecté et affiche l'app
       queryClient.invalidateQueries({ queryKey: ['profile'] });
     },
+    onError: (err) =>
+      setMsgLogin({
+        type: 'err',
+        // si le serveur a répondu, c'est un identifiant invalide ; sinon souci réseau
+        text: err?.response ? 'Email ou mot de passe incorrect.' : messageErreur(err),
+      }),
   });
 
   const mutation_signup = useMutation({
@@ -35,12 +44,23 @@ export default function LoginScreen() {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
       setPoppup(false);
     },
+    onError: (err) =>
+      setMsgSignup({ type: 'err', text: messageErreur(err, 'Inscription impossible.') }),
   });
 
+  function connexion() {
+    setMsgLogin(null);
+    if (!email || !mdp) return setMsgLogin({ type: 'err', text: 'Entre ton email et ton mot de passe.' });
+    mutation_login.mutate({ email, password: mdp });
+  }
+
   function creation_compte() {
-    if (mdpInscription != mdpConfirm) {
-      alert('Les mots de passe ne correspondent pas');
-      return;
+    setMsgSignup(null);
+    if (!emailInscription || !mdpInscription) {
+      return setMsgSignup({ type: 'err', text: 'Entre un email et un mot de passe.' });
+    }
+    if (mdpInscription !== mdpConfirm) {
+      return setMsgSignup({ type: 'err', text: 'Les mots de passe ne correspondent pas.' });
     }
     mutation_signup.mutate({
       fullName: null,
@@ -81,11 +101,16 @@ export default function LoginScreen() {
             style={inputStyle}
             className="bg-card text-foreground rounded-xl px-4 py-3 mb-2"
           />
+          <Feedback msg={msgLogin} />
           <Pressable
             className="bg-accent rounded-full py-4 mt-2 items-center"
-            onPress={() => mutation_login.mutate({ email, password: mdp })}
+            onPress={connexion}
+            disabled={mutation_login.isPending}
+            style={{ opacity: mutation_login.isPending ? 0.6 : 1 }}
           >
-            <Text className="text-background font-bold text-base">Se connecter</Text>
+            <Text className="text-background font-bold text-base">
+              {mutation_login.isPending ? 'Connexion…' : 'Se connecter'}
+            </Text>
           </Pressable>
         </View>
 
@@ -134,8 +159,16 @@ export default function LoginScreen() {
                   style={inputStyle}
                   className="bg-card text-foreground rounded-xl px-4 py-3 mb-2"
                 />
-                <Pressable className="bg-accent rounded-full py-4 mt-2 items-center" onPress={creation_compte}>
-                  <Text className="text-background font-bold text-base">Créer le compte</Text>
+                <Feedback msg={msgSignup} />
+                <Pressable
+                  className="bg-accent rounded-full py-4 mt-2 items-center"
+                  onPress={creation_compte}
+                  disabled={mutation_signup.isPending}
+                  style={{ opacity: mutation_signup.isPending ? 0.6 : 1 }}
+                >
+                  <Text className="text-background font-bold text-base">
+                    {mutation_signup.isPending ? 'Création…' : 'Créer le compte'}
+                  </Text>
                 </Pressable>
               </View>
 

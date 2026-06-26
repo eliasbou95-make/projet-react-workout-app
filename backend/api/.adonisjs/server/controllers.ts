@@ -6,14 +6,14 @@
 export const controllers = {
   AccessTokens: () => import('#controllers/access_tokens_controller'),
   CycleDays: () => import('#controllers/cycle_days_controller'),
+  DayOverrides: () => import('#controllers/day_overrides_controller'),
   ExerciseDefinitions: () => import('#controllers/exercise_definitions_controller'),
   Exercises: () => import('#controllers/exercises_controller'),
   NewAccount: () => import('#controllers/new_account_controller'),
   Performances: () => import('#controllers/performances_controller'),
   Profile: () => import('#controllers/profile_controller'),
   Schedules: () => import('#controllers/schedules_controller'),
+  Sections: () => import('#controllers/sections_controller'),
   WorkoutSessions: () => import('#controllers/workout_sessions_controller'),
   Workouts: () => import('#controllers/workouts_controller'),
-  Sections: () => import('#controllers/sections_controller'),
-  DayOverrides: () => import('#controllers/day_overrides_controller'),
 }

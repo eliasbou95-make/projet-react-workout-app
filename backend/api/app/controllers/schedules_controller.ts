@@ -50,6 +50,10 @@ export default class SchedulesController {
             .where("id",params.id)
             .firstOrFail()
         const payload = await request.validateUsing(updateScheduleValidator)
+        // sécurité : si on change la séance planifiée, elle doit appartenir à l'utilisateur
+        if (payload.workoutId) {
+            await Workout.query().where('userId', user.id).where('id', payload.workoutId).firstOrFail()
+        }
         schedule.merge(payload)
         await schedule.save() 
         return schedule 

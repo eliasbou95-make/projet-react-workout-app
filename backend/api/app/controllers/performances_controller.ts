@@ -13,6 +13,14 @@ export default class PerformancesController {
             .where('id', params.sessionId)
             .firstOrFail()
         const { exerciseId, reps, weight, restTime, notes } = await request.validateUsing(createPerformanceValidator)
+        // sécurité : l'exo doit appartenir à un workout de l'utilisateur
+        // (sinon on pourrait enregistrer une perf sur l'exo d'un autre utilisateur)
+        await Exercise.query()
+            .where('id', exerciseId)
+            .whereIn('workoutId', (sub) => {
+                sub.from('workouts').select('id').where('user_id', user.id)
+            })
+            .firstOrFail()
         const performance = await Performance.create({
             sessionId: session.id,
             exerciseId,
