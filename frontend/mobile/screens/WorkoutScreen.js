@@ -99,7 +99,7 @@ export default function WorkoutScreen({ route, navigation }) {
             start={{ x: 0, y: 0 }}
             end={{ x: 0, y: 1 }}
             className="rounded-2xl py-4 w-full flex-row items-center justify-center border"
-            style={{ borderColor: `${couleur}99`, boxShadow: `0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px ${couleur}66` }}
+            style={{ overflow: 'hidden', borderColor: `${couleur}99`, boxShadow: `0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px ${couleur}66` }}
           >
             <MaterialCommunityIcons name="plus" size={22} color={couleur} />
             <Text className="font-bold text-base ml-2" style={{ color: couleur }}>Nouvelle série</Text>
@@ -113,7 +113,7 @@ export default function WorkoutScreen({ route, navigation }) {
               start={{ x: 0, y: 0 }}
               end={{ x: 0, y: 1 }}
               className="rounded-2xl py-4 w-full flex-row items-center justify-center border border-white/15"
-              style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5)' }}
+              style={{ overflow: 'hidden', boxShadow: '0px 5px 14px rgba(0,0,0,0.5)' }}
             >
               <MaterialCommunityIcons name="flag-checkered" size={20} color="#FAFAFA" />
               <Text className="text-foreground font-bold text-base ml-2">Terminer la séance</Text>
@@ -126,7 +126,7 @@ export default function WorkoutScreen({ route, navigation }) {
               start={{ x: 0, y: 0 }}
               end={{ x: 0, y: 1 }}
               className="rounded-2xl py-4 w-full flex-row items-center justify-center border border-white/15"
-              style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5)' }}
+              style={{ overflow: 'hidden', boxShadow: '0px 5px 14px rgba(0,0,0,0.5)' }}
             >
               <MaterialCommunityIcons name="arrow-right" size={20} color="#FAFAFA" />
               <Text className="text-foreground font-bold text-base ml-2">Prochain exercice</Text>
@@ -149,7 +149,7 @@ export default function WorkoutScreen({ route, navigation }) {
                   start={{ x: 0, y: 0 }}
                   end={{ x: 0, y: 1 }}
                   className="rounded-2xl py-4 w-full flex-row items-center justify-center border"
-                  style={{ borderColor: '#ef444499', boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(239,68,68,0.5)' }}
+                  style={{ overflow: 'hidden', borderColor: '#ef444499', boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(239,68,68,0.5)' }}
                 >
                   <MaterialCommunityIcons name="logout" size={20} color="#ef4444" />
                   <Text className="font-bold text-base ml-2" style={{ color: '#ef4444' }}>Oui, quitter</Text>

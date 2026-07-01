@@ -69,6 +69,37 @@ function CaseJour({ date, state, cycle, cycleStartDate, cycleRepeat, cycleEndRes
   // (un jour 'reset' n'affiche rien : ni croix automatique, ni check)
   const skip = !reset && (sessionJour?.status === 'skipped' || (!!seance && passe && !fait));
 
+  // boîte du jour : style calculé en clair et posé sur une View interne,
+  // car react-native-calendars ignore le style du Pressable racine sur Android
+  const styleCase = {
+    width: tailleCase,
+    height: hauteurCase,
+    margin: margeCase,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: couleurCase && !horsMois ? `${couleurCase}14` : 'transparent',
+    ...(couleurCase && !horsMois && {
+      borderWidth: 1,
+      borderColor: `${couleurCase}aa`,
+      boxShadow: `0px 0px 3px ${couleurCase}55`,
+    }),
+    ...(aujourdhui && couleurCase && !horsMois && {
+      borderColor: couleurCase,
+      boxShadow: `0px 0px 9px ${couleurCase}, 0px 0px 3px ${couleurCase}`,
+    }),
+    ...(aujourdhui && !couleurCase && {
+      borderWidth: 1,
+      borderColor: '#44D62C',
+    }),
+    ...((fait || skip) && !horsMois && {
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.15)',
+      boxShadow: 'none',
+      backgroundColor: 'rgba(255,255,255,0.04)',
+    }),
+  };
+
   return (
     <Pressable
       onPress={() => {
@@ -76,40 +107,8 @@ function CaseJour({ date, state, cycle, cycleStartDate, cycleRepeat, cycleEndRes
         if (seance) onOuvrir(seance, date.dateString);
         else if (repos) onOuvrir(null, date.dateString);   // jour de repos → modale aussi
       }}
-      style={({ pressed, hovered }) => {
-        const actif = pressed || hovered;
-        return {
-          width: tailleCase,
-          height: hauteurCase,
-          margin: margeCase,
-          borderRadius: 16,
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: actif
-            ? 'rgba(255,255,255,0.08)'
-            : (couleurCase && !horsMois ? `${couleurCase}14` : 'transparent'),
-          ...(couleurCase && !horsMois && {
-            borderWidth: 1,
-            borderColor: `${couleurCase}aa`,
-            boxShadow: `0px 0px 3px ${couleurCase}55`,
-          }),
-          ...(aujourdhui && couleurCase && !horsMois && {
-            borderColor: couleurCase,
-            boxShadow: `0px 0px 9px ${couleurCase}, 0px 0px 3px ${couleurCase}`,
-          }),
-          ...(aujourdhui && !couleurCase && {
-            borderWidth: 1,
-            borderColor: '#44D62C',
-          }),
-          ...((fait || skip) && !horsMois && {
-            borderWidth: 1,
-            borderColor: 'rgba(255,255,255,0.15)',
-            boxShadow: 'none',
-            backgroundColor: 'rgba(255,255,255,0.04)',
-          }),
-        };
-      }}
     >
+      <View style={styleCase}>
       {seance && !horsMois ? (
         <View style={{ alignItems: 'center', opacity: (fait || skip) ? 0.4 : 1 }}>
           {seance.icon ? (
@@ -159,6 +158,7 @@ function CaseJour({ date, state, cycle, cycleStartDate, cycleRepeat, cycleEndRes
           />
         </View>
       )}
+      </View>
     </Pressable>
   );
 }

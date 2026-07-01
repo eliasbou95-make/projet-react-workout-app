@@ -195,7 +195,7 @@ export default function TimerScreen({ route, navigation }) {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 0, y: 1 }}
                 className="rounded-2xl py-4 px-12 flex-row items-center justify-center border"
-                style={{ borderColor: `${couleur}99`, boxShadow: `0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px ${couleur}66` }}
+                style={{ overflow: 'hidden', borderColor: `${couleur}99`, boxShadow: `0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px ${couleur}66` }}
               >
                 <MaterialCommunityIcons name="arrow-right" size={22} color={couleur} />
                 <Text className="font-bold text-base ml-2" style={{ color: couleur }}>Prochain exercice</Text>
@@ -263,7 +263,7 @@ export default function TimerScreen({ route, navigation }) {
                     start={{ x: 0, y: 0 }}
                     end={{ x: 0, y: 1 }}
                     className="rounded-2xl py-4 px-10 flex-row items-center justify-center border"
-                    style={{ borderColor: `${couleur}99`, boxShadow: `0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px ${couleur}66` }}
+                    style={{ overflow: 'hidden', borderColor: `${couleur}99`, boxShadow: `0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px ${couleur}66` }}
                   >
                     <MaterialCommunityIcons name={actif ? 'pause' : 'play'} size={22} color={couleur} />
                     <Text className="font-bold text-base ml-2" style={{ color: couleur }}>{actif ? 'Pause' : 'Démarrer'}</Text>
@@ -276,7 +276,7 @@ export default function TimerScreen({ route, navigation }) {
                     start={{ x: 0, y: 0 }}
                     end={{ x: 0, y: 1 }}
                     className="rounded-2xl py-4 px-10 flex-row items-center justify-center border"
-                    style={{ borderColor: `${couleur}99`, boxShadow: `0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px ${couleur}66` }}
+                    style={{ overflow: 'hidden', borderColor: `${couleur}99`, boxShadow: `0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px ${couleur}66` }}
                   >
                     <MaterialCommunityIcons name="arrow-right" size={22} color={couleur} />
                     <Text className="font-bold text-base ml-2" style={{ color: couleur }}>Prochain exercice</Text>

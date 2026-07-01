@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { View, Text, Pressable, Modal, TextInput, ScrollView  } from 'react-native';
+import { View, Text, Pressable, Modal, TextInput, ScrollView, Platform, StatusBar  } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, runOnJS, withTiming } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { Calendar } from 'react-native-calendars';
@@ -186,8 +186,12 @@ export default function SeancesScreen() {
     setSeanceDraggee(null);
     const node = caseVideRef.current;
     if (!node) return;
+    // Android : le doigt (absoluteY) est mesuré barre de statut comprise,
+    // alors que measureInWindow part de sous la barre. On ramène le doigt
+    // dans le même repère en retranchant la hauteur de la barre de statut.
+    const sbH = Platform.OS === 'android' ? (StatusBar.currentHeight ?? 0) : 0;
     node.measureInWindow((zx, zy, zw, zh) => {
-      const dedans = x >= zx && x <= zx + zw && y >= zy && y <= zy + zh;
+      const dedans = x >= zx && x <= zx + zw && (y - sbH) >= zy && (y - sbH) <= zy + zh;
       if (dedans) {
         mutation_cycle.mutate({
           position: cycle?.length ? cycle[cycle.length - 1].position + 1 : 0,
@@ -323,7 +327,7 @@ export default function SeancesScreen() {
           start={{ x: 0, y: 0 }}
           end={{ x: 0, y: 1 }}
           className="w-24 h-28 rounded-2xl items-center justify-center border border-white/10"
-          style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5)' }}
+          style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5)', overflow: 'hidden' }}
         >
           <MaterialCommunityIcons name={exo.icon ?? 'dumbbell'} size={34} color="#44D62C" />
           <Text className="text-foreground text-sm font-semibold mt-2 text-center px-1" numberOfLines={2}>
@@ -415,7 +419,7 @@ export default function SeancesScreen() {
             start={{ x: 0, y: 0 }}
             end={{ x: 0, y: 1 }}
             className="flex-row items-center gap-2 rounded-2xl py-3.5 px-8 border border-accent/60"
-            style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.4)' }}
+            style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.4)', overflow: 'hidden' }}
           >
             <MaterialCommunityIcons name="plus" size={22} color="#44D62C" />
             <Text className="text-accent font-bold text-base">Nouvelle séance</Text>
@@ -430,7 +434,7 @@ export default function SeancesScreen() {
               start={{ x: 0, y: 0 }}
               end={{ x: 0, y: 1 }}
               className="flex-row items-center gap-2 rounded-2xl py-3.5 px-8 border border-accent/60"
-              style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.4)' }}
+              style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.4)', overflow: 'hidden' }}
             >
               <MaterialCommunityIcons name="plus" size={22} color="#44D62C" />
               <Text className="text-accent font-bold text-base">Nouvel exercice</Text>
@@ -443,7 +447,7 @@ export default function SeancesScreen() {
               start={{ x: 0, y: 0 }}
               end={{ x: 0, y: 1 }}
               className="flex-row items-center gap-1.5 rounded-2xl py-2.5 px-4 border border-white/15"
-              style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5)' }}
+              style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5)', overflow: 'hidden' }}
             >
               <MaterialCommunityIcons name="folder-plus" size={18} color="#8E8E93" />
               <Text className="text-muted font-semibold text-sm">Section</Text>
@@ -462,7 +466,7 @@ export default function SeancesScreen() {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 0, y: 1 }}
                 className="w-16 h-16 rounded-2xl items-center justify-center mb-3 border border-accent/70"
-                style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.45)' }}
+                style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.45)', overflow: 'hidden' }}
               >
                 <MaterialCommunityIcons name="dumbbell" size={30} color="#44D62C" />
               </LinearGradient>
@@ -519,7 +523,7 @@ export default function SeancesScreen() {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 0, y: 1 }}
                 className="rounded-xl py-4 items-center border border-accent/60"
-                style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.4)', opacity: creationSeance ? 0.6 : 1 }}
+                style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.4)', opacity: creationSeance ? 0.6 : 1, overflow: 'hidden' }}
               >
                 <Text className="text-accent font-bold text-base">{creationSeance ? 'Création…' : 'Créer la séance'}</Text>
               </LinearGradient>
@@ -549,7 +553,7 @@ export default function SeancesScreen() {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 0, y: 1 }}
                 className="w-16 h-16 rounded-2xl items-center justify-center mb-3 border"
-                style={{ borderColor: `${(workoutOuvert?.couleur ?? '#44D62C')}99`, boxShadow: `0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px ${(workoutOuvert?.couleur ?? '#44D62C')}66` }}
+                style={{ borderColor: `${(workoutOuvert?.couleur ?? '#44D62C')}99`, boxShadow: `0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px ${(workoutOuvert?.couleur ?? '#44D62C')}66`, overflow: 'hidden' }}
               >
                 {workoutOuvert?.icon && (
                   <MaterialCommunityIcons name={workoutOuvert.icon} size={30} color={workoutOuvert?.couleur ?? '#44D62C'} />
@@ -591,7 +595,7 @@ export default function SeancesScreen() {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 0, y: 1 }}
                 className="w-16 h-16 rounded-2xl items-center justify-center mb-3 border border-accent/70"
-                style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.45)' }}
+                style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.45)', overflow: 'hidden' }}
               >
                 <MaterialCommunityIcons name={iconeExo ?? 'arm-flex'} size={30} color="#44D62C" />
               </LinearGradient>
@@ -650,7 +654,7 @@ export default function SeancesScreen() {
                   start={{ x: 0, y: 0 }}
                   end={{ x: 0, y: 1 }}
                   className="rounded-xl py-4 items-center border border-accent/60"
-                  style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.4)' }}
+                  style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.4)', overflow: 'hidden' }}
                 >
                   <Text className="text-accent font-bold text-base">Créer l'exercice</Text>
                 </LinearGradient>
@@ -661,7 +665,7 @@ export default function SeancesScreen() {
                   start={{ x: 0, y: 0 }}
                   end={{ x: 0, y: 1 }}
                   className="rounded-xl py-4 px-5 items-center justify-center border border-accent/60"
-                  style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.4)' }}
+                  style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.4)', overflow: 'hidden' }}
                 >
                   <MaterialCommunityIcons name="plus" size={24} color="#44D62C" />
                 </LinearGradient>
@@ -703,7 +707,7 @@ export default function SeancesScreen() {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 0, y: 1 }}
                 className="rounded-2xl py-4 items-center border border-accent/60"
-                style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.4)' }}
+                style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.4)', overflow: 'hidden' }}
               >
                 <Text className="text-accent font-bold text-base">Compris</Text>
               </LinearGradient>
@@ -730,7 +734,7 @@ export default function SeancesScreen() {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 0, y: 1 }}
                 className="w-16 h-16 rounded-2xl items-center justify-center mb-3 border border-accent/70"
-                style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.45)' }}
+                style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.45)', overflow: 'hidden' }}
               >
                 <MaterialCommunityIcons name="folder-plus" size={30} color="#44D62C" />
               </LinearGradient>
@@ -753,7 +757,7 @@ export default function SeancesScreen() {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 0, y: 1 }}
                 className="rounded-xl py-4 items-center border border-accent/60"
-                style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.4)' }}
+                style={{ boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(68,214,44,0.4)', overflow: 'hidden' }}
               >
                 <Text className="text-accent font-bold text-base">Créer la section</Text>
               </LinearGradient>
@@ -1162,7 +1166,7 @@ export default function SeancesScreen() {
           start={{ x: 0, y: 0 }}
           end={{ x: 0, y: 1 }}
           className="w-16 h-16 rounded-2xl items-center justify-center border"
-          style={{ borderColor: `${couleurClone}99`, boxShadow: `0px 5px 16px rgba(0,0,0,0.55), 0px 0px 9px ${couleurClone}88` }}
+          style={{ borderColor: `${couleurClone}99`, boxShadow: `0px 5px 16px rgba(0,0,0,0.55), 0px 0px 9px ${couleurClone}88`, overflow: 'hidden' }}
         >
           {seanceDraggee.icon ? (
             <MaterialCommunityIcons name={seanceDraggee.icon} size={30} color={couleurClone} />
@@ -1195,7 +1199,7 @@ function GrilleIcones({ valeur, onChoisir }) {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 0, y: 1 }}
                 className={`w-14 h-14 rounded-2xl items-center justify-center border ${actif ? 'border-accent/70' : 'border-white/10'}`}
-                style={actif ? { boxShadow: '0px 0px 5px rgba(68,214,44,0.45)' } : null}
+                style={[{ overflow: 'hidden' }, actif ? { boxShadow: '0px 0px 5px rgba(68,214,44,0.45)' } : null]}
               >
                 <MaterialCommunityIcons name={nomIcone} size={26} color={actif ? '#44D62C' : '#8E8E93'} />
               </LinearGradient>
@@ -1237,7 +1241,7 @@ function PastilleDraggable({ seance, dragX, dragY, onDragStart, onDrop, supprime
               start={{ x: 0, y: 0 }}
               end={{ x: 0, y: 1 }}
               className="w-12 h-12 rounded-2xl items-center justify-center border"
-              style={{ borderColor: `${couleur}99`, boxShadow: `0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px ${couleur}66` }}
+              style={{ borderColor: `${couleur}99`, boxShadow: `0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px ${couleur}66`, overflow: 'hidden' }}
             >
               {seance.icon ? (
                 <MaterialCommunityIcons name={seance.icon} size={24} color={couleur} />

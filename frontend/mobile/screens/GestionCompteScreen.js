@@ -117,7 +117,7 @@ export default function GestionCompteScreen({ navigation }) {
             <TextInput value={nouveau} onChangeText={setNouveau} secureTextEntry placeholder="8 caractères min." placeholderTextColor="#8E8E93" style={inputStyle} className="bg-card text-foreground rounded-xl px-4 py-3 mb-4" />
             <Feedback msg={msgPwd} />
             <Pressable onPress={() => { setMsgPwd(null); mut_password.mutate({ currentPassword: ancien, newPassword: nouveau }); }} disabled={mut_password.isPending || !ancien || !nouveau}>
-              <LinearGradient colors={['#1E1E20', '#0D0D0E']} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} className="rounded-xl py-3.5 items-center border border-accent/60" style={{ opacity: (mut_password.isPending || !ancien || !nouveau) ? 0.5 : 1 }}>
+              <LinearGradient colors={['#1E1E20', '#0D0D0E']} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} className="rounded-xl py-3.5 items-center border border-accent/60" style={{ overflow: 'hidden', opacity: (mut_password.isPending || !ancien || !nouveau) ? 0.5 : 1 }}>
                 <Text className="text-accent font-bold">{mut_password.isPending ? 'Modification…' : 'Modifier le mot de passe'}</Text>
               </LinearGradient>
             </Pressable>
@@ -133,7 +133,7 @@ export default function GestionCompteScreen({ navigation }) {
             <TextInput value={mdpEmail} onChangeText={setMdpEmail} secureTextEntry placeholder="••••••••" placeholderTextColor="#8E8E93" style={inputStyle} className="bg-card text-foreground rounded-xl px-4 py-3 mb-4" />
             <Feedback msg={msgEmail} />
             <Pressable onPress={() => { setMsgEmail(null); mut_email.mutate({ password: mdpEmail, email }); }} disabled={mut_email.isPending || !email || !mdpEmail}>
-              <LinearGradient colors={['#1E1E20', '#0D0D0E']} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} className="rounded-xl py-3.5 items-center border border-accent/60" style={{ opacity: (mut_email.isPending || !email || !mdpEmail) ? 0.5 : 1 }}>
+              <LinearGradient colors={['#1E1E20', '#0D0D0E']} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} className="rounded-xl py-3.5 items-center border border-accent/60" style={{ overflow: 'hidden', opacity: (mut_email.isPending || !email || !mdpEmail) ? 0.5 : 1 }}>
                 <Text className="text-accent font-bold">{mut_email.isPending ? 'Modification…' : "Modifier l'email"}</Text>
               </LinearGradient>
             </Pressable>

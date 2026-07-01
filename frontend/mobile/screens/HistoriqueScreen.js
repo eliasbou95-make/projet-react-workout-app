@@ -243,7 +243,7 @@ export default function HistoriqueScreen() {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 0, y: 1 }}
                 className="rounded-2xl py-4 w-full flex-row items-center justify-center border"
-                style={{ borderColor: '#ef444499', boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(239,68,68,0.5)' }}
+                style={{ overflow: 'hidden', borderColor: '#ef444499', boxShadow: '0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px rgba(239,68,68,0.5)' }}
               >
                 <MaterialCommunityIcons name="trash-can-outline" size={20} color="#ef4444" />
                 <Text className="font-bold text-base ml-2" style={{ color: '#ef4444' }}>

@@ -151,7 +151,7 @@ function Bouton({ onPress, couleur, icone, label }) {
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
         className="flex-row items-center gap-2 rounded-2xl py-3.5 px-7 border"
-        style={{ borderColor: `${couleur}99`, boxShadow: `0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px ${couleur}66` }}
+        style={{ overflow: 'hidden', borderColor: `${couleur}99`, boxShadow: `0px 5px 14px rgba(0,0,0,0.5), 0px 0px 5px ${couleur}66` }}
       >
         <MaterialCommunityIcons name={icone} size={20} color={couleur} />
         <Text className="font-bold text-base" style={{ color: couleur }}>{label}</Text>

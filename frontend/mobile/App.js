@@ -75,6 +75,7 @@ function BarreFlottante({ state, navigation }) {
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
         style={{
+          overflow: 'hidden',
           paddingHorizontal: 8,
           paddingVertical: 8,
           borderRadius: 999,
